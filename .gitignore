@@ -1,2 +1,7 @@
 # Node modules
 node_modules/
+
+# For different OS
+package-lock.json
+
+.env

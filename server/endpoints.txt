@@ -1,0 +1,39 @@
+API Structure 
+
+### Authentication Endpoints
+```
+POST   /api/auth/register        # Register new user (admin only)
+POST   /api/auth/login           # Login and get JWT token
+POST   /api/auth/logout          # Logout
+GET    /api/auth/me              # Get current user info
+```
+
+### Shift Endpoints
+```
+GET    /api/shifts               # Get all shifts (with filters: date, employee, status)
+GET    /api/shifts/:id           # Get single shift
+POST   /api/shifts               # Create shift (manager only)
+PUT    /api/shifts/:id           # Update shift (manager only)
+DELETE /api/shifts/:id           # Delete shift (manager only)
+GET    /api/shifts/week/:date    # Get week view starting from date
+```
+
+### Time Off Endpoints
+```
+GET    /api/time-off             # Get time off requests
+POST   /api/time-off             # Submit time off request (employee)
+PUT    /api/time-off/:id         # Update request status (manager only)
+DELETE /api/time-off/:id         # Cancel request (employee, own only)
+```
+
+### Shift Swap Endpoints
+```
+GET    /api/shift-swaps          # Get available shifts to pick up
+POST   /api/shift-swaps          # Request to pick up a shift
+PUT    /api/shift-swaps/:id      # Approve/deny swap (manager only)
+```
+
+### User Endpoints
+```
+GET    /api/users                # Get all employees (manager only)
+GET    /api/users/:id            # Get employee details
