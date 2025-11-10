@@ -1,0 +1,34 @@
+:root {
+  --ink: #0a2540; /* deep navy for focus/button */
+  --ink-2: #004869; /* hover */
+  --card-bg: rgba(255, 255, 255, 0.78);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --grid-dot: #e9e6df; /* faint beige grid to match the mockup */
+  --bg-top: #fbfbfc;
+  --bg-bottom: #f1f3f6;
+}
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px);
+  background-size: 22px 22px;
+  opacity: 0.9;
+  z-index: 0;
+}
+
+.bg-wave {
+  position: fixed;
+  inset: auto -20% -30% -20%; /* spill slightly */
+  height: 60vh;
+  z-index: 0;
+  filter: blur(28px);
+  opacity: 0.6;
+  background: radial-gradient(
+      60% 80% at 30% 70%,
+      rgba(0, 82, 150, 0.12),
+      transparent 60%
+    ),
+    radial-gradient(60% 80% at 70% 30%, rgba(0, 122, 204, 0.1), transparent 60%),
+    radial-gradient(80% 60% at 50% 50%, rgba(0, 51, 79, 0.1), transparent 60%);
+}

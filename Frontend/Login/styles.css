@@ -1,9 +1,9 @@
 :root {
-  --ink: #0a2540; /* deep navy for focus/button */
-  --ink-2: #004869; /* hover */
+  --ink: #0a2540; 
+  --ink-2: #004869; 
   --card-bg: rgba(255, 255, 255, 0.78);
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  --grid-dot: #e9e6df; /* faint beige grid to match the mockup */
+  --grid-dot: #e9e6df; 
   --bg-top: #fbfbfc;
   --bg-bottom: #f1f3f6;
 }
@@ -18,30 +18,28 @@ body {
   height: 100%;
 }
 body {
-  min-height: 100dvh; /* mobile-safe viewport */
+  min-height: 100dvh; 
   font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
     Cantarell, 'Helvetica Neue', Arial, sans-serif;
   color: #111;
   position: relative;
-  overflow: hidden; /* keep waves inside */
+  overflow: hidden; 
   background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
 }
 
-/* Subtle beige grid (dots) */
 .bg-grid {
   position: fixed;
   inset: 0;
   pointer-events: none;
   background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px);
-  background-size: 22px 22px; /* faint and tight like the mockup */
+  background-size: 22px 22px; 
   opacity: 0.9;
   z-index: 0;
 }
 
-/* Soft abstract wave behind card */
 .bg-wave {
   position: fixed;
-  inset: auto -20% -30% -20%; /* spill slightly */
+  inset: auto -20% -30% -20%; 
   height: 60vh;
   z-index: 0;
   filter: blur(28px);
@@ -55,10 +53,10 @@ body {
     radial-gradient(80% 60% at 50% 50%, rgba(0, 51, 79, 0.1), transparent 60%);
 }
 
-/* Centering shell */
+
 .login-shell {
   position: relative;
-  z-index: 1; /* above background */
+  z-index: 1; 
   min-height: 100dvh;
   display: flex;
   align-items: center;
@@ -66,7 +64,7 @@ body {
   padding: 24px;
 }
 
-/* Card */
+
 .login-card {
   width: 100%;
   max-width: 380px;
@@ -80,15 +78,15 @@ body {
   align-items: center;
 }
 
-/* Logo */
+
 .logo {
-  width: 168px; /* close to the mockup balance */
+  width: 168px; 
   height: auto;
   margin-bottom: 28px;
   display: block;
 }
 
-/* Form */
+
 .login-form {
   width: 100%;
   display: flex;
@@ -111,7 +109,7 @@ body {
   box-shadow: 0 0 0 3px rgba(10, 37, 64, 0.12);
 }
 
-/* Button */
+
 .login-form button {
   margin-top: 6px;
   background: var(--ink);
@@ -135,7 +133,7 @@ body {
   transform: translateY(1px);
 }
 
-/* Accessibility helper for hidden labels */
+
 .sr-only {
   position: absolute !important;
   width: 1px;
@@ -148,7 +146,7 @@ body {
   border: 0;
 }
 
-/* Small screens */
+
 @media (max-width: 480px) {
   .login-card {
     padding: 28px 22px 22px;
