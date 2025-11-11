@@ -1,3 +1,6 @@
+import { Request } from 'express';
+
+// User types
 export interface User {
   id: string;
   email: string;
@@ -8,6 +11,20 @@ export interface User {
   updated_at: string;
 }
 
+export interface CreateUserInput {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  role: 'manager' | 'employee';
+}
+
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
+// Shift types
 export interface Shift {
   id: string;
   assigned_to: string | null;
@@ -22,6 +39,26 @@ export interface Shift {
   updated_at: string;
 }
 
+export interface CreateShiftInput {
+  assigned_to?: string;
+  shift_date: string;
+  start_time: string;
+  end_time: string;
+  position: string;
+  notes?: string;
+}
+
+export interface UpdateShiftInput {
+  assigned_to?: string;
+  shift_date?: string;
+  start_time?: string;
+  end_time?: string;
+  position?: string;
+  status?: 'scheduled' | 'open' | 'completed' | 'cancelled';
+  notes?: string;
+}
+
+// Time off types
 export interface TimeOffRequest {
   id: string;
   employee_id: string;
@@ -35,6 +72,17 @@ export interface TimeOffRequest {
   updated_at: string;
 }
 
+export interface CreateTimeOffInput {
+  start_date: string;
+  end_date: string;
+  reason?: string;
+}
+
+export interface UpdateTimeOffInput {
+  status: 'approved' | 'denied';
+}
+
+// Shift swap types
 export interface ShiftSwapRequest {
   id: string;
   shift_id: string;
@@ -46,11 +94,19 @@ export interface ShiftSwapRequest {
   created_at: string;
 }
 
-// Request types with JWT payload
+// Extended Express Request with user info
 export interface AuthRequest extends Request {
   user?: {
     id: string;
     email: string;
     role: 'manager' | 'employee';
   };
+}
+
+// API Response types
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
 }
