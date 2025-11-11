@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WorkSense Login</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-grid"></div>
+    <div class="bg-wave"></div>
+
+    <main class="login-shell" role="main">
+      <div class="login-card" aria-label="Login form">
+        <img
+          src="../src/assets/WorkSense_logo_compressed_under_1MB.jpg"
+          alt="WorkSense logo"
+          class="logo"
+          width="200"
+          height="60"
+        />
+
+        <h1 class="login-title">Welcome back</h1>
+        <p class="login-subtext">Sign in to continue to your dashboard</p>
+
+        <!-- Disable native popup if you don't want “Please fill out this field” -->
+        <form class="login-form" action="#" method="post" autocomplete="on" novalidate>
+          <div class="input-group">
+            <label for="email">Email</label>
+            <input id="email" name="name" type="text" placeholder="Enter your email" />
+          </div>
+
+          <div class="input-group password-group">
+            <label for="password">Password</label>
+            <div class="password-wrapper">
+              <input id="password" name="password" type="password" placeholder="Enter your password" />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <a href="#" class="forgot-password">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="login-btn">Log in</button>
+
+          <p class="signup-prompt">
+            Don’t have an account?
+            <a href="#" class="signup-link">Create one</a>
+          </p>
+        </form>
+      </div>
+    </main>
+
+</html>
