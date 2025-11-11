@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WorkSense — Forms</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+
+    <style>
+      .workspace {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        align-items: start;
+        padding: 1rem;
+      }
+      @media (max-width: 900px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.06);
+        padding: 16px;
+      }
+      .card h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 8px;
+      }
+      .muted {
+        color: #6b7280;
+        font-weight: 400;
+        font-size: 0.9rem;
+      }
+
+      .form {
+        display: grid;
+        gap: 0.9rem;
+        margin-top: 0.5rem;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+      .row-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.75rem;
+      }
+      .field {
+        display: grid;
+        gap: 0.35rem;
+      }
+      .field label {
+        font-size: 0.85rem;
+        color: #374151;
+      }
+      .field input[type='text'],
+      .field input[type='date'],
+      .field input[type='time'],
+      .field select,
+      .field textarea {
+        width: 100%;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 0.6rem 0.7rem;
+        font: inherit;
+        background: #fff;
+      }
+      .field textarea {
+        min-height: 68px;
+        resize: vertical;
+      }
+      .inline {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        user-select: none;
+        font-size: 0.9rem;
+        color: #374151;
+      }
+      .actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+        margin-top: 0.25rem;
+      }
+      .btn {
+        appearance: none;
+        border: 0;
+        border-radius: 999px;
+        padding: 0.6rem 1rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: #111827;
+        color: #fff;
+      }
+      .btn-ghost {
+        background: #f3f4f6;
+        color: #111827;
+      }
+      .helper {
+        font-size: 0.8rem;
+        color: #6b7280;
+      }
+
+      .toast {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        background: #111827;
+        color: #fff;
+        border-radius: 10px;
+        padding: 0.7rem 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        z-index: 9999;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-wave" aria-hidden="true"></div>
+
+    <nav id="pages">
+      <a href="../Home/home.html">Home</a>
+      <a href="#">Account Details</a>
+      <a href="../Login/login.html">Sign Out</a>
+    </nav>
+
+    <section class="workspace">
+      <aside class="card" id="shift-change-card">
+        <h2>
+          Shift Change Request
+          <span class="muted"
+            >· choose your current shift and the desired change</span
+          >
+        </h2>
+
+        <form id="shiftChangeForm" class="form">
+          <div class="field">
+            <label for="sc-employee">Employee</label>
+            <input
+              id="sc-employee"
+              name="employee"
+              type="text"
+              placeholder="Your name"
+            />
+            <div class="helper">Used to look up your existing shifts.</div>
+          </div>
+
+          <div class="field">
+            <label for="sc-existing">Your Shift</label>
+            <select id="sc-existing" name="existingShift">
+              <option value="">— Select one of your upcoming shifts —</option>
+            </select>
+            <div class="helper" id="sc-existing-help">
+              Pick from your shifts in the next 30 days.
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="sc-date">Desired Date</label>
+              <input id="sc-date" name="desiredDate" type="date" />
+            </div>
+            <div class="field">
+              <label for="sc-start">Desired Start</label>
+              <input id="sc-start" name="desiredStart" type="time" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="sc-end">Desired End</label>
+              <input id="sc-end" name="desiredEnd" type="time" />
+            </div>
+            <div class="field">
+              <label for="sc-notes">Notes (optional)</label>
+              <input
+                id="sc-notes"
+                name="notes"
+                type="text"
+                placeholder="Reason or details…"
+              />
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="btn btn-ghost" id="sc-clear">
+              Clear
+            </button>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </form>
+      </aside>
+
+      <aside class="card" id="time-off-card">
+        <h2>
+          Time Off Request
+          <span class="muted">· pick a start and (optional) end</span>
+        </h2>
+
+        <form id="timeOffForm" class="form">
+          <div class="row">
+            <div class="field">
+              <label for="to-start-date">Start Date</label>
+              <input id="to-start-date" name="startDate" type="date" />
+            </div>
+            <div class="field">
+              <label for="to-start-time">Start Time</label>
+              <input id="to-start-time" name="startTime" type="time" />
+              <label class="inline">
+                <input id="to-start-all" type="checkbox" /> All day
+              </label>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="to-end-date">End Date</label>
+              <input id="to-end-date" name="endDate" type="date" />
+            </div>
+            <div class="field">
+              <label for="to-end-time">End Time</label>
+              <input id="to-end-time" name="endTime" type="time" />
+              <label class="inline">
+                <input id="to-end-all" type="checkbox" /> All day
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="to-reason">Reason (optional)</label>
+            <textarea
+              id="to-reason"
+              name="reason"
+              placeholder="Short reason for manager…"
+            ></textarea>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="btn btn-ghost" id="to-clear">
+              Clear
+            </button>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </form>
+      </aside>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      if (!window.currentUser) window.currentUser = 'Alex';
+      const demoShifts = [
+        {
+          date: '2025-11-10',
+          start: '09:00',
+          end: '13:00',
+          employee: 'Alex',
+          note: 'Front desk',
+        },
+        {
+          date: '2025-11-10',
+          start: '12:00',
+          end: '18:00',
+          employee: 'Sam',
+          note: 'Kitchen',
+        },
+        {
+          date: '2025-11-11',
+          start: '10:00',
+          end: '16:00',
+          employee: 'Alex',
+          note: 'Register',
+        },
+        {
+          date: '2025-11-12',
+          start: '08:00',
+          end: '12:00',
+          employee: 'Jamie',
+          note: 'Inventory',
+        },
+      ];
+      const allShifts = Array.isArray(window.shiftsData)
+        ? window.shiftsData.slice()
+        : demoShifts;
+
+      const pad = (n) => String(n).padStart(2, '0');
+      const toLocalISO = (d) =>
+        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+      function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2200);
+      }
+
+      const scForm = document.getElementById('shiftChangeForm');
+      const scEmployee = document.getElementById('sc-employee');
+      const scExisting = document.getElementById('sc-existing');
+      const scDate = document.getElementById('sc-date');
+      const scStart = document.getElementById('sc-start');
+      const scEnd = document.getElementById('sc-end');
+      const scNotes = document.getElementById('sc-notes');
+
+      scEmployee.value = window.currentUser || '';
+
+      function getUserShifts(name) {
+        const n = (name || '').toLowerCase();
+        const today = new Date();
+        const in30 = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate() + 30
+        );
+        return allShifts
+          .filter((s) => (s.employee || '').toLowerCase() === n)
+          .filter((s) => {
+            const [Y, M, D] = s.date.split('-').map(Number);
+            const d = new Date(Y, M - 1, D);
+            return (
+              d >=
+                new Date(
+                  today.getFullYear(),
+                  today.getMonth(),
+                  today.getDate()
+                ) && d <= in30
+            );
+          })
+          .sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
+      }
+
+      function populateExistingShifts() {
+        const name = scEmployee.value.trim() || window.currentUser || '';
+        const shifts = getUserShifts(name);
+        scExisting.innerHTML = `<option value="">— Select one of your upcoming shifts —</option>`;
+        for (const s of shifts) {
+          const label = `${new Date(s.date).toLocaleDateString(undefined, {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+          })} · ${s.start}–${s.end}${s.note ? ' · ' + s.note : ''}`;
+          const value = JSON.stringify(s);
+          const opt = document.createElement('option');
+          opt.value = value;
+          opt.textContent = label;
+          scExisting.appendChild(opt);
+        }
+        document.getElementById('sc-existing-help').textContent = shifts.length
+          ? 'Pick from your shifts in the next 30 days.'
+          : 'No upcoming shifts found for that name.';
+      }
+
+      scEmployee.addEventListener('change', populateExistingShifts);
+      populateExistingShifts();
+
+      scExisting.addEventListener('change', () => {
+        if (!scExisting.value) return;
+        try {
+          const s = JSON.parse(scExisting.value);
+          scDate.value = s.date;
+          scStart.value = s.start;
+          scEnd.value = s.end;
+        } catch {}
+      });
+
+      document.getElementById('sc-clear').addEventListener('click', () => {
+        scExisting.selectedIndex = 0;
+        scDate.value = scStart.value = scEnd.value = '';
+        scNotes.value = '';
+      });
+
+      scForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const employee = scEmployee.value.trim();
+        if (!employee) return showToast('Enter your name first.');
+        if (!scExisting.value) return showToast('Select your current shift.');
+        if (!scDate.value) return showToast('Choose a desired date.');
+        if (!scStart.value || !scEnd.value)
+          return showToast('Add desired start/end times.');
+
+        const current = JSON.parse(scExisting.value);
+        const payload = {
+          type: 'SHIFT_CHANGE_REQUEST',
+          employee,
+          currentShift: current,
+          desired: {
+            date: scDate.value,
+            start: scStart.value,
+            end: scEnd.value,
+          },
+          notes: scNotes.value || '',
+        };
+
+        console.log('Send to manager:', payload);
+        showToast('Shift change request sent to manager.');
+        scForm.reset();
+        scEmployee.value = employee;
+        populateExistingShifts();
+      });
+
+      // ---- TIME OFF FORM ----
+      const toForm = document.getElementById('timeOffForm');
+      const toStartDate = document.getElementById('to-start-date');
+      const toStartTime = document.getElementById('to-start-time');
+      const toStartAll = document.getElementById('to-start-all');
+      const toEndDate = document.getElementById('to-end-date');
+      const toEndTime = document.getElementById('to-end-time');
+      const toEndAll = document.getElementById('to-end-all');
+      const toReason = document.getElementById('to-reason');
+
+      function toggleTime(input, checked) {
+        input.disabled = checked;
+        if (checked) input.value = '';
+      }
+      toStartAll.addEventListener('change', () =>
+        toggleTime(toStartTime, toStartAll.checked)
+      );
+      toEndAll.addEventListener('change', () =>
+        toggleTime(toEndTime, toEndAll.checked)
+      );
+
+      document.getElementById('to-clear').addEventListener('click', () => {
+        toForm.reset();
+      });
+
+      toForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!toStartDate.value) return showToast('Choose a start date.');
+        if (!toEndDate.value) return showToast('Choose an end date.');
+
+        const start = new Date(toStartDate.value);
+        const end = new Date(toEndDate.value);
+        if (end < start) return showToast('End date must be after start date.');
+
+        const payload = {
+          type: 'TIME_OFF_REQUEST',
+          employee: (scEmployee.value || window.currentUser || '').trim(),
+          start: {
+            date: toStartDate.value,
+            time: toStartAll.checked ? null : toStartTime.value || null,
+            allDay: !!toStartAll.checked,
+          },
+          end: {
+            date: toEndDate.value,
+            time: toEndAll.checked ? null : toEndTime.value || null,
+            allDay: !!toEndAll.checked,
+          },
+          reason: toReason.value || '',
+        };
+
+        console.log('Send to manager:', payload);
+        showToast('Time off request sent to manager.');
+        toForm.reset();
+      });
+
+      const today = new Date();
+      const tomorrow = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() + 1
+      );
+      toStartDate.value = toLocalISO(today);
+      toEndDate.value = toLocalISO(tomorrow);
+    </script>
+  </body>
+</html>
