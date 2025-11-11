@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WorkSense — Account Details</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+
+    <style>
+      .workspace {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        align-items: start;
+        padding: 1rem;
+      }
+      @media (max-width: 900px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.06);
+        padding: 16px;
+      }
+      .card h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 8px;
+      }
+      .muted {
+        color: #6b7280;
+        font-weight: 400;
+        font-size: 0.9rem;
+      }
+
+      .form {
+        display: grid;
+        gap: 0.9rem;
+        margin-top: 0.5rem;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+      .row-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.75rem;
+      }
+      .field {
+        display: grid;
+        gap: 0.35rem;
+      }
+      .field label {
+        font-size: 0.85rem;
+        color: #374151;
+      }
+      .field input[type='text'],
+      .field input[type='date'],
+      .field input[type='time'],
+      .field select,
+      .field textarea {
+        width: 100%;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 0.6rem 0.7rem;
+        font: inherit;
+        background: #fff;
+      }
+      .field textarea {
+        min-height: 68px;
+        resize: vertical;
+      }
+      .inline {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        user-select: none;
+        font-size: 0.9rem;
+        color: #374151;
+      }
+      .actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+        margin-top: 0.25rem;
+      }
+      .btn {
+        appearance: none;
+        border: 0;
+        border-radius: 999px;
+        padding: 0.6rem 1rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: #111827;
+        color: #fff;
+      }
+      .btn-ghost {
+        background: #f3f4f6;
+        color: #111827;
+      }
+      .helper {
+        font-size: 0.8rem;
+        color: #6b7280;
+      }
+
+      .toast {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        background: #111827;
+        color: #fff;
+        border-radius: 10px;
+        padding: 0.7rem 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        z-index: 9999;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-wave" aria-hidden="true"></div>
+
+    <nav id="pages">
+      <a href="../Home/home.html">Home</a>
+      <a href="../Forms/forms.html">Forms</a>
+      <a href="../Login/login.html">Sign Out</a>
+    </nav>
+  </body>
+</html>
