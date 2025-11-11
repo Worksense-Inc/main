@@ -1,46 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Manager Version: Forms</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-       <nav id="pages">
-      <a href="../Manager-calendar/manager-calendar.html">Calendar</a>
-      <a href="../Login/login.html">Sign Out</a>
-    </nav>
-    <h1 class="page-title">Forms</h1>
-
-    <div class="forms-container">
-      <section class="form-section">
-        <h2>Shift Swaps</h2>
-        <div class="card">
-          <p><strong>Jorge - 2026</strong></p>
-          <p>with</p>
-          <p><strong>Tucker - 2027</strong></p>
-          <div class="actions">
-            <button class="approve">Approve</button>
-            <button class="deny">Deny</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="form-section">
-        <h2>Day Off Requests</h2>
-        <div class="card">
-          <p><strong>Jorge - 2026</strong></p>
-          <div class="actions">
-            <button class="approve">Approve</button>
-            <button class="deny">Deny</button>
-          </div>
-        </div>
-      </section>
-    </div>
-  </body>
-</html> -->
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -61,21 +18,18 @@
     <div class="bg-wave" aria-hidden="true"></div>
 
     <nav id="pages">
-      <a href="../Home/home.html">Home</a>
-      <a href="../Account-Info/personal.html">Account Details</a>
+      <a href="../Manager-calendar/manager-calendar.html">Shift Calendar</a>
       <a href="../Login/login.html">Sign Out</a>
     </nav>
 
     <h1 class="page-title">Manager Version: Forms</h1>
 
     <section class="workspace">
-      <!-- LEFT: Shift Swaps -->
       <aside class="card">
         <h2>Shift Swaps <span class="muted">· pending approvals</span></h2>
         <div id="swapList" class="req-list"></div>
       </aside>
 
-      <!-- RIGHT: Day Off Requests -->
       <aside class="card">
         <h2>Day Off Requests <span class="muted">· pending approvals</span></h2>
         <div id="offList" class="req-list"></div>
@@ -86,13 +40,39 @@
 
     <script>
       const swapRequests = [
-        { id: 'sw1', from: 'Jorge', fromYear: 2026, with: 'Tucker', withYear: 2027, note: 'Swap 11/14 10–16 with 12–18' },
-        { id: 'sw2', from: 'Jamie', fromYear: 2025, with: 'Alex', withYear: 2026, note: 'Both evening shifts' },
+        {
+          id: 'sw1',
+          from: 'Jorge',
+          fromYear: 2026,
+          with: 'Tucker',
+          withYear: 2027,
+          note: 'Swap 11/14 10–16 with 12–18',
+        },
+        {
+          id: 'sw2',
+          from: 'Jamie',
+          fromYear: 2025,
+          with: 'Alex',
+          withYear: 2026,
+          note: 'Both evening shifts',
+        },
       ];
 
       const dayOffRequests = [
-        { id: 'do1', employee: 'Jorge', year: 2026, range: 'Nov 18 (all day)', reason: 'Family event' },
-        { id: 'do2', employee: 'Sam', year: 2027, range: 'Nov 20 · 09:00–13:00', reason: 'Dentist' },
+        {
+          id: 'do1',
+          employee: 'Jorge',
+          year: 2026,
+          range: 'Nov 18 (all day)',
+          reason: 'Family event',
+        },
+        {
+          id: 'do2',
+          employee: 'Sam',
+          year: 2027,
+          range: 'Nov 20 · 09:00–13:00',
+          reason: 'Dentist',
+        },
       ];
 
       function showToast(msg) {
@@ -118,13 +98,23 @@
           const card = document.createElement('div');
           card.className = 'req-card';
           card.innerHTML = `
-            <div class="req-title">${r.from} – ${r.fromYear} with ${r.with} – ${r.withYear}</div>
+            <div class="req-title">${r.from} – ${r.fromYear} with ${r.with} – ${
+            r.withYear
+          }</div>
             <div class="req-meta">${r.note || ''}</div>
           `;
           const actions = document.createElement('div');
           actions.className = 'actions';
-          actions.appendChild(makeBtn('Approve', 'btn-approve', () => handleDecision('SWAP', r.id, true)));
-          actions.appendChild(makeBtn('Deny', 'btn-deny', () => handleDecision('SWAP', r.id, false)));
+          actions.appendChild(
+            makeBtn('Approve', 'btn-approve', () =>
+              handleDecision('SWAP', r.id, true)
+            )
+          );
+          actions.appendChild(
+            makeBtn('Deny', 'btn-deny', () =>
+              handleDecision('SWAP', r.id, false)
+            )
+          );
           card.appendChild(actions);
           root.appendChild(card);
         });
@@ -138,12 +128,22 @@
           card.className = 'req-card';
           card.innerHTML = `
             <div class="req-title">${r.employee} – ${r.year}</div>
-            <div class="req-meta">${r.range} ${r.reason ? `· ${r.reason}` : ''}</div>
+            <div class="req-meta">${r.range} ${
+            r.reason ? `· ${r.reason}` : ''
+          }</div>
           `;
           const actions = document.createElement('div');
           actions.className = 'actions';
-          actions.appendChild(makeBtn('Approve', 'btn-approve', () => handleDecision('DAY_OFF', r.id, true)));
-          actions.appendChild(makeBtn('Deny', 'btn-deny', () => handleDecision('DAY_OFF', r.id, false)));
+          actions.appendChild(
+            makeBtn('Approve', 'btn-approve', () =>
+              handleDecision('DAY_OFF', r.id, true)
+            )
+          );
+          actions.appendChild(
+            makeBtn('Deny', 'btn-deny', () =>
+              handleDecision('DAY_OFF', r.id, false)
+            )
+          );
           card.appendChild(actions);
           root.appendChild(card);
         });
