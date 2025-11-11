@@ -1,4 +1,4 @@
-import { body, param, query, ValidationChain } from 'express-validator';
+import { body, param, ValidationChain } from 'express-validator';
 
 // Auth validators
 export const registerValidator: ValidationChain[] = [

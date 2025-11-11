@@ -11,7 +11,7 @@ interface JwtPayload {
 
 export const authenticateToken = async (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   try {
@@ -44,7 +44,7 @@ export const authenticateToken = async (
 
 export const requireManager = (
   req: AuthRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   if (!req.user) {
@@ -59,7 +59,7 @@ export const requireManager = (
 };
 
 export const requireOwnerOrManager = (resourceUserId: string) => {
-  return (req: AuthRequest, res: Response, next: NextFunction) => {
+  return (req: AuthRequest, _res: Response, next: NextFunction) => {
     if (!req.user) {
       return next(new AppError('Authentication required', 401));
     }
