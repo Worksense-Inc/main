@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
     <title>WorkSense — Account Details</title>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -10,142 +13,107 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
-
-    <style>
-      .workspace {
-        max-width: 1100px;
-        margin: 0 auto;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.25rem;
-        align-items: start;
-        padding: 1rem;
-      }
-      @media (max-width: 900px) {
-        .workspace {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      .card {
-        background: #fff;
-        border-radius: 14px;
-        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.06);
-        padding: 16px;
-      }
-      .card h2 {
-        font-size: 1.1rem;
-        font-weight: 600;
-        margin: 0 0 8px;
-      }
-      .muted {
-        color: #6b7280;
-        font-weight: 400;
-        font-size: 0.9rem;
-      }
-
-      .form {
-        display: grid;
-        gap: 0.9rem;
-        margin-top: 0.5rem;
-      }
-      .row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.75rem;
-      }
-      .row-3 {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 0.75rem;
-      }
-      .field {
-        display: grid;
-        gap: 0.35rem;
-      }
-      .field label {
-        font-size: 0.85rem;
-        color: #374151;
-      }
-      .field input[type='text'],
-      .field input[type='date'],
-      .field input[type='time'],
-      .field select,
-      .field textarea {
-        width: 100%;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        padding: 0.6rem 0.7rem;
-        font: inherit;
-        background: #fff;
-      }
-      .field textarea {
-        min-height: 68px;
-        resize: vertical;
-      }
-      .inline {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        user-select: none;
-        font-size: 0.9rem;
-        color: #374151;
-      }
-      .actions {
-        display: flex;
-        gap: 0.75rem;
-        justify-content: flex-end;
-        margin-top: 0.25rem;
-      }
-      .btn {
-        appearance: none;
-        border: 0;
-        border-radius: 999px;
-        padding: 0.6rem 1rem;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      .btn-primary {
-        background: #111827;
-        color: #fff;
-      }
-      .btn-ghost {
-        background: #f3f4f6;
-        color: #111827;
-      }
-      .helper {
-        font-size: 0.8rem;
-        color: #6b7280;
-      }
-
-      .toast {
-        position: fixed;
-        right: 16px;
-        bottom: 16px;
-        background: #111827;
-        color: #fff;
-        border-radius: 10px;
-        padding: 0.7rem 1rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-        opacity: 0;
-        transform: translateY(12px);
-        transition: opacity 0.18s ease, transform 0.18s ease;
-        z-index: 9999;
-      }
-      .toast.show {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    </style>
   </head>
+
   <body>
     <div class="bg-grid" aria-hidden="true"></div>
     <div class="bg-wave" aria-hidden="true"></div>
 
-    <nav id="pages">
-      <a href="../Home/home.html">Home</a>
-      <a href="../Forms/forms.html">Forms</a>
-      <a href="../Login/login.html">Sign Out</a>
-    </nav>
+    <header class="site-header">
+      <div class="brand">
+        <span class="dot"></span>
+        <span class="logo-text">WorkSense</span>
+      </div>
+      <nav id="pages" aria-label="Primary">
+        <a href="../Manager-calendar/manager-calendar.html">Calendar</a>
+        <a href="#" aria-current="page">Account</a>
+        <a href="../Login/login.html">Sign Out</a>
+      </nav>
+    </header>
+
+    <main class="shell" id="content">
+      <div class="head">
+        <h1>Account Details</h1>
+        <p class="hint">Basic info used across scheduling and notifications.</p>
+      </div>
+
+      <section class="grid">
+        <aside class="card profile">
+          <div class="avatar" aria-hidden="true">JD</div>
+          <div class="profile-meta">
+            <h2 class="tight">Jamie Douglass</h2>
+            <p class="muted">Manager • Central Team</p>
+          </div>
+          <button class="btn ghost" type="button">Change Photo</button>
+        </aside>
+
+        <form class="card form" action="#" method="post" novalidate>
+          <div class="row">
+            <label for="first">First name</label>
+            <input id="first" name="first" placeholder="Jamie" />
+          </div>
+
+          <div class="row">
+            <label for="last">Last name</label>
+            <input id="last" name="last" placeholder="Douglass" />
+          </div>
+
+          <div class="row">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="jamie@worksense.com" />
+          </div>
+
+          <div class="row">
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" inputmode="tel" placeholder="(555) 123-4567" />
+          </div>
+
+          <div class="row">
+            <label for="location">Location / Timezone</label>
+            <div class="field-split">
+              <input id="location" name="location" placeholder="Chicago, IL" />
+              <select id="tz" name="tz" aria-label="Timezone">
+                <option>America/Chicago (CST)</option>
+                <option>America/New_York (EST)</option>
+                <option>America/Los_Angeles (PST)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="role">Role</label>
+            <input id="role" name="role" placeholder="Manager" />
+          </div>
+
+          <div class="actions">
+            <button class="btn primary" type="submit">Save Changes</button>
+            <button class="btn ghost" type="button">Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card slim">
+        <h3 class="tight">Notification Preferences</h3>
+        <p class="muted small">A rough stub—wire up later.</p>
+        <div class="switch-row">
+          <label class="switch">
+            <input type="checkbox" checked />
+            <span class="slider"></span>
+          </label>
+          <span>Email me when shifts change</span>
+        </div>
+        <div class="switch-row">
+          <label class="switch">
+            <input type="checkbox" />
+            <span class="slider"></span>
+          </label>
+          <span>Text me daily reminders</span>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <small class="muted">© 2025 WorkSense</small>
+    </footer>
   </body>
 </html>

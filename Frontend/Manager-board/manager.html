@@ -3,20 +3,168 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>WorkSense — Account Details</title>
+    <title>WorkSense — Manager Forms</title>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
-     <body>
+    <link rel="stylesheet" href="manager-forms.css" />
+  </head>
+
+  <body>
     <div class="bg-grid" aria-hidden="true"></div>
     <div class="bg-wave" aria-hidden="true"></div>
 
     <nav id="pages">
-      <a href="../Manager-calendar/manager-calendar.html">Calendar</a>
+      <a href="../Manager-calendar/manager-calendar.html">Shift Calendar</a>
       <a href="../Login/login.html">Sign Out</a>
     </nav>
+
+    <h1 class="page-title">Manager Version: Forms</h1>
+
+    <section class="workspace">
+      <aside class="card">
+        <h2>Shift Swaps <span class="muted">· pending approvals</span></h2>
+        <div id="swapList" class="req-list"></div>
+      </aside>
+
+      <aside class="card">
+        <h2>Day Off Requests <span class="muted">· pending approvals</span></h2>
+        <div id="offList" class="req-list"></div>
+      </aside>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      const swapRequests = [
+        {
+          id: 'sw1',
+          from: 'Jorge',
+          fromYear: 2026,
+          with: 'Tucker',
+          withYear: 2027,
+          note: 'Swap 11/14 10–16 with 12–18',
+        },
+        {
+          id: 'sw2',
+          from: 'Jamie',
+          fromYear: 2025,
+          with: 'Alex',
+          withYear: 2026,
+          note: 'Both evening shifts',
+        },
+      ];
+
+      const dayOffRequests = [
+        {
+          id: 'do1',
+          employee: 'Jorge',
+          year: 2026,
+          range: 'Nov 18 (all day)',
+          reason: 'Family event',
+        },
+        {
+          id: 'do2',
+          employee: 'Sam',
+          year: 2027,
+          range: 'Nov 20 · 09:00–13:00',
+          reason: 'Dentist',
+        },
+      ];
+
+      function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+      }
+
+      function makeBtn(text, cls, onClick) {
+        const b = document.createElement('button');
+        b.className = `btn ${cls}`;
+        b.type = 'button';
+        b.textContent = text;
+        b.addEventListener('click', onClick);
+        return b;
+      }
+
+      function renderSwapList(list) {
+        const root = document.getElementById('swapList');
+        root.innerHTML = '';
+        list.forEach((r) => {
+          const card = document.createElement('div');
+          card.className = 'req-card';
+          card.innerHTML = `
+            <div class="req-title">${r.from} – ${r.fromYear} with ${r.with} – ${
+            r.withYear
+          }</div>
+            <div class="req-meta">${r.note || ''}</div>
+          `;
+          const actions = document.createElement('div');
+          actions.className = 'actions';
+          actions.appendChild(
+            makeBtn('Approve', 'btn-approve', () =>
+              handleDecision('SWAP', r.id, true)
+            )
+          );
+          actions.appendChild(
+            makeBtn('Deny', 'btn-deny', () =>
+              handleDecision('SWAP', r.id, false)
+            )
+          );
+          card.appendChild(actions);
+          root.appendChild(card);
+        });
+      }
+
+      function renderOffList(list) {
+        const root = document.getElementById('offList');
+        root.innerHTML = '';
+        list.forEach((r) => {
+          const card = document.createElement('div');
+          card.className = 'req-card';
+          card.innerHTML = `
+            <div class="req-title">${r.employee} – ${r.year}</div>
+            <div class="req-meta">${r.range} ${
+            r.reason ? `· ${r.reason}` : ''
+          }</div>
+          `;
+          const actions = document.createElement('div');
+          actions.className = 'actions';
+          actions.appendChild(
+            makeBtn('Approve', 'btn-approve', () =>
+              handleDecision('DAY_OFF', r.id, true)
+            )
+          );
+          actions.appendChild(
+            makeBtn('Deny', 'btn-deny', () =>
+              handleDecision('DAY_OFF', r.id, false)
+            )
+          );
+          card.appendChild(actions);
+          root.appendChild(card);
+        });
+      }
+
+      function handleDecision(type, id, approved) {
+        console.log('Decision:', { type, id, approved });
+        showToast(approved ? 'Approved' : 'Denied');
+        if (type === 'SWAP') {
+          const i = swapRequests.findIndex((r) => r.id === id);
+          if (i >= 0) swapRequests.splice(i, 1);
+          renderSwapList(swapRequests);
+        } else {
+          const i = dayOffRequests.findIndex((r) => r.id === id);
+          if (i >= 0) dayOffRequests.splice(i, 1);
+          renderOffList(dayOffRequests);
+        }
+      }
+
+      renderSwapList(swapRequests);
+      renderOffList(dayOffRequests);
+    </script>
   </body>
 </html>
