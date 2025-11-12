@@ -16,7 +16,7 @@ import userRoutes from './routes/users';
 import shiftSwapRoutes from './routes/shiftSwaps';
 
 // Import middleware
-import {notFound, errorHandler } from './middleware/errorHandler';
+import { errorHandler, notFound } from './middleware/errorHandler';
 
 dotenv.config();
 
@@ -25,16 +25,18 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(helmet()); // Security headers
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    credentials: true,
+  })
+);
 app.use(morgan('dev')); // Logging
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 

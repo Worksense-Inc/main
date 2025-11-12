@@ -19,5 +19,5 @@ router.get('/:id', getUserById);
 // PUT and DELETE routes (managers only)
 router.put('/:id', requireManager, updateUser);
 router.delete('/:id', requireManager, deleteUser);
-
+≈r
 export default router;

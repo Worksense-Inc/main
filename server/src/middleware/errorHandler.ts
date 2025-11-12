@@ -16,9 +16,9 @@ export class AppError extends Error {
 
 export const errorHandler = (
   err: Error | AppError,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   // Log expected errors
   if (err instanceof AppError) {
@@ -31,14 +31,14 @@ export const errorHandler = (
   // Log unexpected errors
   console.error('ERROR 💥:', err);
 
-  res.status(500).json({
+  return res.status(500).json({
     success: false,
     error: 'Internal server error',
     ...(process.env.NODE_ENV === 'development' && { details: err.message }),
   });
 };
 
-export const notFound = (req: Request, res: Response, next: NextFunction) => {
+export const notFound = (req: Request, _res: Response, next: NextFunction) => {
   const error = new AppError(`Route ${req.originalUrl} not found`, 404);
   next(error);
 };
