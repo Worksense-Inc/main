@@ -38,10 +38,19 @@
           <h2 id="list-h">Shifts</h2>
           <div class="shift-list">
             <div class="shift-list__filters">
-              <label>Selected day: <input id="selected-day" type="date" /></label>
-              <label>Employee: <select id="employee-filter"></select></label>
+              <label
+                >Selected day: <input id="selected-day" type="date"
+              /></label>
+              <label
+                >Employee:
+                <select id="employee-filter"></select
+              ></label>
             </div>
-            <ul id="shifts-container" class="shift-list" aria-live="polite"></ul>
+            <ul
+              id="shifts-container"
+              class="shift-list"
+              aria-live="polite"
+            ></ul>
           </div>
         </article>
       </section>
@@ -49,32 +58,61 @@
 
     <script>
       (function () {
-        const ALL = "__all__";
+        const ALL = '__all__';
 
-        const pad = (n) => String(n).padStart(2, "0");
+        const pad = (n) => String(n).padStart(2, '0');
         const toLocalISO = (d) =>
           `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
-        if (!window.currentUser) window.currentUser = "Alex";
+        if (!window.currentUser) window.currentUser = 'Alex';
         const demo = [
-          { date: "2025-11-10", start: "09:00", end: "13:00", employee: "Alex", note: "Front desk" },
-          { date: "2025-11-10", start: "12:00", end: "18:00", employee: "Sam", note: "Kitchen" },
-          { date: "2025-11-11", start: "10:00", end: "16:00", employee: "Alex", note: "Register" },
-          { date: "2025-11-12", start: "08:00", end: "12:00", employee: "Jamie", note: "Inventory" }
+          {
+            date: '2025-11-10',
+            start: '09:00',
+            end: '13:00',
+            employee: 'Alex',
+            note: 'Front desk',
+          },
+          {
+            date: '2025-11-10',
+            start: '12:00',
+            end: '18:00',
+            employee: 'Sam',
+            note: 'Kitchen',
+          },
+          {
+            date: '2025-11-11',
+            start: '10:00',
+            end: '16:00',
+            employee: 'Alex',
+            note: 'Register',
+          },
+          {
+            date: '2025-11-12',
+            start: '08:00',
+            end: '12:00',
+            employee: 'Jamie',
+            note: 'Inventory',
+          },
         ];
-        const allShifts = Array.isArray(window.shiftsData) ? window.shiftsData.slice() : demo;
+        const allShifts = Array.isArray(window.shiftsData)
+          ? window.shiftsData.slice()
+          : demo;
 
-        const normalize = (s) => (s ?? "").toString().trim().toLowerCase();
+        const normalize = (s) => (s ?? '').toString().trim().toLowerCase();
         const matchesEmployee = (shiftEmp, who) =>
           who === ALL || normalize(shiftEmp) === normalize(who);
 
-        function createMiniCalendar(rootId, { events = new Set(), onDayClick } = {}) {
+        function createMiniCalendar(
+          rootId,
+          { events = new Set(), onDayClick } = {}
+        ) {
           const root = document.getElementById(rootId);
           const state = { view: new Date(), events: new Set(events) };
           const todayISO = toLocalISO(new Date());
 
-          const el = document.createElement("div");
-          el.className = "mini-cal";
+          const el = document.createElement('div');
+          el.className = 'mini-cal';
           el.innerHTML = `
             <div class="mini-cal__bar">
               <div class="mini-cal__title" aria-live="polite"></div>
@@ -91,11 +129,11 @@
           `;
           root.replaceWith(el);
 
-          const title = el.querySelector(".mini-cal__title");
-          const grid = el.querySelector(".mini-cal__grid");
+          const title = el.querySelector('.mini-cal__title');
+          const grid = el.querySelector('.mini-cal__grid');
 
-          el.addEventListener("click", (e) => {
-            const nav = e.target.closest("[data-dir]");
+          el.addEventListener('click', (e) => {
+            const nav = e.target.closest('[data-dir]');
             if (nav) {
               const dir = Number(nav.dataset.dir);
               const d = state.view;
@@ -104,7 +142,8 @@
               return;
             }
             const day = e.target.closest('.mini-cal__cell[data-date]');
-            if (day && typeof onDayClick === "function") onDayClick(day.dataset.date);
+            if (day && typeof onDayClick === 'function')
+              onDayClick(day.dataset.date);
           });
 
           function render() {
@@ -115,18 +154,25 @@
             const startDay = first.getDay();
             const daysInMonth = new Date(y, m + 1, 0).getDate();
 
-            title.textContent = d.toLocaleString(undefined, { month: "long", year: "numeric" });
+            title.textContent = d.toLocaleString(undefined, {
+              month: 'long',
+              year: 'numeric',
+            });
 
             const cells = [];
             for (let i = 0; i < 42; i++) {
-              const cell = document.createElement("div");
-              cell.className = "mini-cal__cell";
+              const cell = document.createElement('div');
+              cell.className = 'mini-cal__cell';
 
               let dateObj;
               if (i < startDay) {
                 dateObj = new Date(y, m, 1 - (startDay - i));
               } else if (i >= startDay + daysInMonth) {
-                dateObj = new Date(y, m, i - (startDay + daysInMonth) + 1 + daysInMonth);
+                dateObj = new Date(
+                  y,
+                  m,
+                  i - (startDay + daysInMonth) + 1 + daysInMonth
+                );
               } else {
                 dateObj = new Date(y, m, i - startDay + 1);
               }
@@ -134,17 +180,18 @@
               const dateISO = toLocalISO(dateObj);
               const out = dateObj.getMonth() !== m;
 
-              if (out) cell.classList.add("mini-cal__cell--out");
-              if (dateISO === todayISO) cell.classList.add("mini-cal__cell--today");
+              if (out) cell.classList.add('mini-cal__cell--out');
+              if (dateISO === todayISO)
+                cell.classList.add('mini-cal__cell--today');
               if (state.events.has(dateISO)) {
-                const dot = document.createElement("span");
-                dot.className = "mini-cal__dot";
+                const dot = document.createElement('span');
+                dot.className = 'mini-cal__dot';
                 cell.appendChild(dot);
-                cell.classList.add("mini-cal__cell--has-shift");
+                cell.classList.add('mini-cal__cell--has-shift');
               }
 
               cell.textContent = String(dateObj.getDate());
-              cell.setAttribute("data-date", dateISO);
+              cell.setAttribute('data-date', dateISO);
               cells.push(cell);
             }
             grid.replaceChildren(...cells);
@@ -159,22 +206,26 @@
             goTo(year, monthIndex0) {
               state.view = new Date(year, monthIndex0, 1);
               render();
-            }
+            },
           };
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-          const welcome = document.getElementById("welcome");
+        document.addEventListener('DOMContentLoaded', () => {
+          const welcome = document.getElementById('welcome');
           welcome.textContent = `Welcome, ${window.currentUser}!`;
 
-          const selectedDay = document.getElementById("selected-day");
-          const employeeFilter = document.getElementById("employee-filter");
-          const container = document.getElementById("shifts-container");
+          const selectedDay = document.getElementById('selected-day');
+          const employeeFilter = document.getElementById('employee-filter');
+          const container = document.getElementById('shifts-container');
 
-          const uniqueEmployees = Array.from(new Set(allShifts.map((s) => s.employee))).sort();
+          const uniqueEmployees = Array.from(
+            new Set(allShifts.map((s) => s.employee))
+          ).sort();
           employeeFilter.innerHTML =
             `<option value="${ALL}">All employees</option>` +
-            uniqueEmployees.map((e) => `<option value="${e}">${e}</option>`).join("");
+            uniqueEmployees
+              .map((e) => `<option value="${e}">${e}</option>`)
+              .join('');
           employeeFilter.value = ALL;
 
           const getFilteredEventDates = () => {
@@ -186,12 +237,12 @@
             );
           };
 
-          const cal = createMiniCalendar("mini-cal-root", {
+          const cal = createMiniCalendar('mini-cal-root', {
             events: getFilteredEventDates(),
             onDayClick: (iso) => {
               selectedDay.value = iso;
               renderShifts();
-            }
+            },
           });
 
           const todayISO = toLocalISO(new Date());
@@ -200,16 +251,15 @@
             ? todayISO
             : allShifts.find((s) => initialDates.has(s.date))?.date || todayISO;
 
-          selectedDay.addEventListener("change", renderShifts);
-          employeeFilter.addEventListener("change", () => {
+          selectedDay.addEventListener('change', renderShifts);
+          employeeFilter.addEventListener('change', () => {
             const dates = getFilteredEventDates();
             cal.setEvents(dates);
 
             if (!dates.has(selectedDay.value)) {
-              selectedDay.value =
-                dates.has(todayISO)
-                  ? todayISO
-                  : allShifts.find((s) => dates.has(s.date))?.date || todayISO;
+              selectedDay.value = dates.has(todayISO)
+                ? todayISO
+                : allShifts.find((s) => dates.has(s.date))?.date || todayISO;
             }
             renderShifts();
           });
@@ -225,22 +275,22 @@
             container.replaceChildren();
 
             if (!list.length) {
-              const empty = document.createElement("li");
-              empty.className = "shift-empty";
-              empty.textContent = "No shifts match these filters.";
+              const empty = document.createElement('li');
+              empty.className = 'shift-empty';
+              empty.textContent = 'No shifts match these filters.';
               container.appendChild(empty);
               return;
             }
 
             for (const s of list) {
-              const li = document.createElement("li");
-              li.className = "shift-item";
-              li.setAttribute("role", "listitem");
+              const li = document.createElement('li');
+              li.className = 'shift-item';
+              li.setAttribute('role', 'listitem');
               li.innerHTML = `
                 <div>
                   <span class="time">${s.start}–${s.end}</span>
                   <span class="who">· ${s.employee}</span>
-                  ${s.note ? `<span class="note"> — ${s.note}</span>` : ""}
+                  ${s.note ? `<span class="note"> — ${s.note}</span>` : ''}
                 </div>
                 <div class="date">${s.date}</div>
               `;
