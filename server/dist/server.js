@@ -8,11 +8,14 @@ const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
 const dotenv_1 = __importDefault(require("dotenv"));
+// Import config
+const supabase_1 = require("./config/supabase");
 // Import routes
 const auth_1 = __importDefault(require("./routes/auth"));
 const shifts_1 = __importDefault(require("./routes/shifts"));
 const timeOff_1 = __importDefault(require("./routes/timeOff"));
 const users_1 = __importDefault(require("./routes/users"));
+const shiftSwaps_1 = __importDefault(require("./routes/shiftSwaps"));
 // Import middleware
 const errorHandler_1 = require("./middleware/errorHandler");
 dotenv_1.default.config();
@@ -36,12 +39,25 @@ app.use('/api/auth', auth_1.default);
 app.use('/api/shifts', shifts_1.default);
 app.use('/api/time-off', timeOff_1.default);
 app.use('/api/users', users_1.default);
+app.use('/api/shift-swaps', shiftSwaps_1.default);
 // Error handling
 app.use(errorHandler_1.notFound);
 app.use(errorHandler_1.errorHandler);
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📝 Environment: ${process.env.NODE_ENV}`);
-});
+// Start server and test DB connection
+const startServer = async () => {
+    try {
+        await (0, supabase_1.testConnection)();
+        app.listen(PORT, () => {
+            console.log(`🚀 Server running on port ${PORT}`);
+            console.log(`📝 Environment: ${process.env.NODE_ENV}`);
+            console.log(`🔗 API Base: http://localhost:${PORT}/api`);
+        });
+    }
+    catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+};
+startServer();
 exports.default = app;
 //# sourceMappingURL=server.js.map

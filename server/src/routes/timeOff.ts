@@ -1,13 +1,45 @@
 import { Router } from 'express';
+import {
+  getAllTimeOffRequests,
+  getTimeOffById,
+  createTimeOffRequest,
+  updateTimeOffStatus,
+  deleteTimeOffRequest,
+} from '../controllers/timeOffController';
+import { authenticateToken, requireManager } from '../middleware/auth';
+import { createTimeOffValidator, updateTimeOffValidator } from '../middleware/validators';
+import { validationResult } from 'express-validator';
+import { Request, Response, NextFunction } from 'express';
 
 const router = Router();
 
-// TODO: Implement time off endpoints
-router.get('/', (_req, res) =>
-  res.status(501).json({ message: 'Not implemented' })
-);
-router.post('/', (_req, res) =>
-  res.status(501).json({ message: 'Not implemented' })
-);
+// Validation middleware wrapper
+const validate = (req: Request, res: Response, next: NextFunction): void => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({
+      success: false,
+      errors: errors.array()
+    });
+    return;
+  }
+  next();
+};
+
+// All routes require authentication
+router.use(authenticateToken);
+
+// GET routes
+router.get('/', getAllTimeOffRequests);
+router.get('/:id', getTimeOffById);
+
+// POST routes (employees can create their own)
+router.post('/', createTimeOffValidator, validate, createTimeOffRequest);
+
+// PUT routes (managers approve/deny)
+router.put('/:id', requireManager, updateTimeOffValidator, validate, updateTimeOffStatus);
+
+// DELETE routes (employees can delete their own pending requests)
+router.delete('/:id', deleteTimeOffRequest);
 
 export default router;

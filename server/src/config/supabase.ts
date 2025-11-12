@@ -22,4 +22,28 @@ export const supabase = createClient(SUPABASE_URL, KEY, {
   },
 });
 
+/**
+ * Test the database connection
+ * @returns Promise<void>
+ */
+export const testConnection = async (): Promise<void> => {
+  try {
+    // Simple query to test connection - queries the users table
+    const { error } = await supabase
+      .from('users')
+      .select('id')
+      .limit(1);
+
+    if (error) {
+      console.error('[Supabase] Connection test failed:', error.message);
+      throw new Error(`Database connection failed: ${error.message}`);
+    }
+
+    console.log('[Supabase] Database connection successful');
+  } catch (error) {
+    console.error('[Supabase] Connection test error:', error);
+    throw error;
+  }
+};
+
 export default supabase;

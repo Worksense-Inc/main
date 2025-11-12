@@ -9,7 +9,8 @@ export class AppError extends Error {
     this.statusCode = statusCode;
     this.isOperational = true;
 
-    Error.captureStackTrace(this, this.constructor);
+    // Traces error from function call not constructor call
+    Error.captureStackTrace(this, this.constructor); 
   }
 }
 
@@ -19,6 +20,7 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction
 ) => {
+  // Log expected errors
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       success: false,
