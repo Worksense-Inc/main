@@ -9,19 +9,19 @@ import { AppError } from '../middleware/errorHandler';
 // TODO: Replace with Jorge's User model functions
 // ========================================
 const db = {
-  async findUserByEmail(email: string) {
+  async findUserByEmail(email: string): Promise<any | null> {
     // TODO: Jorge will provide this query
     // Should return user object or null
     throw new Error('Database function not implemented');
   },
-  
-  async createUser(userData: any) {
+
+  async createUser(userData: any): Promise<any> {
     // TODO: Jorge will provide this query
     // Should return created user object
     throw new Error('Database function not implemented');
   },
-  
-  async findUserById(id: string) {
+
+  async findUserById(id: string): Promise<any | null> {
     // TODO: Jorge will provide this query
     // Should return user object or null
     throw new Error('Database function not implemented');
@@ -40,7 +40,7 @@ const generateToken = (userId: string, email: string, role: string): string => {
   return jwt.sign(
     { id: userId, email, role },
     jwtSecret,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as jwt.SignOptions
   );
 };
 

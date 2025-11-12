@@ -6,11 +6,13 @@ class AppError extends Error {
         super(message);
         this.statusCode = statusCode;
         this.isOperational = true;
+        // Traces error from function call not constructor call
         Error.captureStackTrace(this, this.constructor);
     }
 }
 exports.AppError = AppError;
 const errorHandler = (err, _req, res, _next) => {
+    // Log expected errors
     if (err instanceof AppError) {
         return res.status(err.statusCode).json({
             success: false,

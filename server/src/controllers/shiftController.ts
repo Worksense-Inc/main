@@ -7,33 +7,33 @@ import { AppError } from '../middleware/errorHandler';
 // TODO: Replace with Jorge's Shift model functions
 // ========================================
 const db = {
-  async getAllShifts(filters?: any) {
+  async getAllShifts(filters?: any): Promise<any[]> {
     // TODO: Jorge will provide this query
     // Should support filters: date range, employee_id, status
     throw new Error('Database function not implemented');
   },
-  
-  async getShiftById(id: string) {
+
+  async getShiftById(id: string): Promise<any | null> {
     // TODO: Jorge will provide this query
     throw new Error('Database function not implemented');
   },
-  
-  async createShift(shiftData: any, createdBy: string) {
+
+  async createShift(shiftData: any, createdBy: string): Promise<any> {
     // TODO: Jorge will provide this query
     throw new Error('Database function not implemented');
   },
-  
-  async updateShift(id: string, updates: any) {
+
+  async updateShift(id: string, updates: any): Promise<any> {
     // TODO: Jorge will provide this query
     throw new Error('Database function not implemented');
   },
-  
-  async deleteShift(id: string) {
+
+  async deleteShift(id: string): Promise<boolean> {
     // TODO: Jorge will provide this query
     throw new Error('Database function not implemented');
   },
-  
-  async getShiftsByDateRange(startDate: string, endDate: string, filters?: any) {
+
+  async getShiftsByDateRange(startDate: string, endDate: string, filters?: any): Promise<any[]> {
     // TODO: Jorge will provide this query
     throw new Error('Database function not implemented');
   }

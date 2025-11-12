@@ -7,27 +7,27 @@ import { AppError } from '../middleware/errorHandler';
 // TODO: Replace with Jorge's TimeOff model functions
 // ========================================
 const db = {
-  async getAllTimeOffRequests(filters?: any) {
+  async getAllTimeOffRequests(filters?: any): Promise<any[]> {
     // TODO: Jorge will provide this query
     throw new Error('Database function not implemented');
   },
-  
-  async getTimeOffById(id: string) {
+
+  async getTimeOffById(id: string): Promise<any | null> {
     // TODO: Jorge will provide this query
     throw new Error('Database function not implemented');
   },
-  
-  async createTimeOffRequest(requestData: any) {
+
+  async createTimeOffRequest(requestData: any): Promise<any> {
     // TODO: Jorge will provide this query
     throw new Error('Database function not implemented');
   },
-  
-  async updateTimeOffStatus(id: string, status: string, reviewedBy: string) {
+
+  async updateTimeOffStatus(id: string, status: string, reviewedBy: string): Promise<any> {
     // TODO: Jorge will provide this query
     throw new Error('Database function not implemented');
   },
-  
-  async deleteTimeOffRequest(id: string) {
+
+  async deleteTimeOffRequest(id: string): Promise<boolean> {
     // TODO: Jorge will provide this query
     throw new Error('Database function not implemented');
   }
