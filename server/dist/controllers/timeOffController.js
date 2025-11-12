@@ -1,36 +1,41 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteTimeOffRequest = exports.updateTimeOffStatus = exports.createTimeOffRequest = exports.getTimeOffById = exports.getAllTimeOffRequests = void 0;
 const errorHandler_1 = require("../middleware/errorHandler");
-// ========================================
-// PLACEHOLDER DATABASE FUNCTIONS
-// TODO: Replace with Jorge's TimeOff model functions
-// ========================================
-const db = {
-    async getAllTimeOffRequests(filters) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    },
-    async getTimeOffById(id) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    },
-    async createTimeOffRequest(requestData) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    },
-    async updateTimeOffStatus(id, status, reviewedBy) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    },
-    async deleteTimeOffRequest(id) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    }
-};
-// ========================================
-// CONTROLLER FUNCTIONS
-// ========================================
+const TimeOffModel = __importStar(require("../models/TimeOff"));
 /**
  * @route   GET /api/time-off
  * @desc    Get all time off requests
@@ -47,7 +52,7 @@ const getAllTimeOffRequests = async (req, res, next) => {
         if (req.query.status) {
             filters.status = req.query.status;
         }
-        const requests = await db.getAllTimeOffRequests(filters);
+        const requests = await TimeOffModel.findAll(filters);
         res.status(200).json({
             success: true,
             data: requests,
@@ -67,7 +72,7 @@ exports.getAllTimeOffRequests = getAllTimeOffRequests;
 const getTimeOffById = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const request = await db.getTimeOffById(id);
+        const request = await TimeOffModel.findById(id);
         if (!request) {
             throw new errorHandler_1.AppError('Time off request not found', 404);
         }
@@ -102,7 +107,7 @@ const createTimeOffRequest = async (req, res, next) => {
         if (endDate < startDate) {
             throw new errorHandler_1.AppError('End date must be after start date', 400);
         }
-        const newRequest = await db.createTimeOffRequest({
+        const newRequest = await TimeOffModel.create({
             employee_id: req.user.id,
             start_date,
             end_date,
@@ -132,14 +137,18 @@ const updateTimeOffStatus = async (req, res, next) => {
         if (!req.user) {
             throw new errorHandler_1.AppError('User not authenticated', 401);
         }
-        const request = await db.getTimeOffById(id);
+        const request = await TimeOffModel.findById(id);
         if (!request) {
             throw new errorHandler_1.AppError('Time off request not found', 404);
         }
         if (request.status !== 'pending') {
             throw new errorHandler_1.AppError('Only pending requests can be updated', 400);
         }
-        const updatedRequest = await db.updateTimeOffStatus(id, status, req.user.id);
+        const updatedRequest = await TimeOffModel.update(id, {
+            status: status,
+            reviewed_by: req.user.id,
+            reviewed_at: new Date().toISOString(),
+        });
         res.status(200).json({
             success: true,
             message: `Time off request ${status}`,
@@ -162,7 +171,7 @@ const deleteTimeOffRequest = async (req, res, next) => {
         if (!req.user) {
             throw new errorHandler_1.AppError('User not authenticated', 401);
         }
-        const request = await db.getTimeOffById(id);
+        const request = await TimeOffModel.findById(id);
         if (!request) {
             throw new errorHandler_1.AppError('Time off request not found', 404);
         }
@@ -173,7 +182,7 @@ const deleteTimeOffRequest = async (req, res, next) => {
         if (request.status !== 'pending') {
             throw new errorHandler_1.AppError('Only pending requests can be deleted', 400);
         }
-        await db.deleteTimeOffRequest(id);
+        await TimeOffModel.deleteTimeOffRequest(id);
         res.status(200).json({
             success: true,
             message: 'Time off request deleted successfully',

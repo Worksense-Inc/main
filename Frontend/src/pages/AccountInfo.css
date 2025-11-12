@@ -69,22 +69,6 @@
   margin: 0;
 }
 
-.btn-change-photo {
-  background: transparent;
-  border: 1px solid #e5e7eb;
-  color: #6b7280;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-change-photo:hover {
-  background: #f9fafb;
-  color: #374151;
-}
-
 /* Form Card */
 .account-form {
   display: grid;
@@ -152,89 +136,16 @@
   color: #374151;
 }
 
-/* Notifications Card */
-.notifications-card {
-  padding: 1.5rem;
+/* Utility Classes */
+.input-disabled {
+  background: #f3f4f6 !important;
+  cursor: not-allowed !important;
 }
 
-.notifications-card h3 {
-  font-size: 1rem;
-  margin: 0 0 0.25rem;
-  color: #111827;
-}
-
-.notifications-card .small {
-  color: #9ca3af;
-  font-size: 0.85rem;
-  margin: 0 0 1rem;
-}
-
-.switch-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.switch-row:last-child {
-  border-bottom: none;
-}
-
-.switch-row span {
-  font-size: 0.9rem;
-  color: #374151;
-}
-
-/* Toggle Switch */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-  flex-shrink: 0;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #e5e7eb;
-  transition: 0.2s;
-  border-radius: 24px;
-}
-
-.slider:before {
-  position: absolute;
-  content: '';
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.2s;
-  border-radius: 50%;
-}
-
-.switch input:checked + .slider {
-  background-color: #3b82f6;
-}
-
-.switch input:checked + .slider:before {
-  transform: translateX(20px);
-}
-
-.switch input:focus + .slider {
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+.helper-text {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
 }
 
 /* Footer */

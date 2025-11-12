@@ -90,6 +90,12 @@
   font-family: inherit;
 }
 
+/* Utility Classes */
+.input-disabled {
+  background: #f3f4f6 !important;
+  cursor: not-allowed !important;
+}
+
 .form-field .helper {
   font-size: 0.8rem;
   color: #6b7280;

@@ -1,59 +1,71 @@
-import { useState, useMemo } from 'react';
-import { demoShifts, demoUser } from '../data/mockData';
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { api, ShiftDto } from '../services/api';
+import { useToast } from '../components/Toast';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { formatMediumDate, formatLongDate, getTodayString } from '../utils/dateHelpers';
 import './Home.css';
 import '../styles/shared.css';
 
 export const HomePage = () => {
+  const { user } = useAuth();
+  const { showToast } = useToast();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [shifts, setShifts] = useState<ShiftDto[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Filter shifts for current user
-  const userShifts = useMemo(() => {
-    return demoShifts.filter(
-      (shift) => shift.employee.toLowerCase() === demoUser.name.toLowerCase(),
-    );
-  }, []);
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      if (!user) return;
+      setLoading(true);
+      const res = await api.getShifts({ employee_id: user.id });
+      if (!cancelled) {
+        if (res.success && res.data) {
+          setShifts(res.data);
+        } else {
+          showToast(res.message || 'Failed to load shifts');
+        }
+        setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, showToast]);
 
   // Get shifts for selected date or all shifts
   const displayShifts = useMemo(() => {
-    if (!selectedDate) return userShifts;
-    return userShifts.filter((shift) => shift.date === selectedDate);
-  }, [userShifts, selectedDate]);
+    if (!selectedDate) return shifts;
+    return shifts.filter((shift) => shift.shift_date === selectedDate);
+  }, [shifts, selectedDate]);
 
   // Get dates with shifts for calendar highlighting
   const shiftDates = useMemo(() => {
-    return new Set(userShifts.map((shift) => shift.date));
-  }, [userShifts]);
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr + 'T00:00:00');
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const formatDateLong = (dateStr: string) => {
-    const date = new Date(dateStr + 'T00:00:00');
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+    return new Set(shifts.map((s) => s.shift_date));
+  }, [shifts]);
 
   return (
     <div className="home-workspace">
       <aside className="shifts-card">
         <h2>
-          Shifts<span className="who">for {demoUser.name}</span>
+          Shifts
+          <span className="who">
+            for {user?.first_name} {user?.last_name}
+          </span>
         </h2>
+        {loading && (
+          <div className="shift-list-empty">
+            <LoadingSpinner size="small" />
+          </div>
+        )}
 
         {selectedDate && (
           <div className="active-filter">
             <span>
-              Showing shifts for <strong>{formatDateLong(selectedDate)}</strong>
+              Showing shifts for <strong>{formatLongDate(selectedDate)}</strong>
             </span>
             <button className="link-btn" onClick={() => setSelectedDate(null)}>
               Clear
@@ -62,16 +74,16 @@ export const HomePage = () => {
         )}
 
         <ul className="shift-list">
-          {displayShifts.length === 0 ? (
+          {displayShifts.length === 0 && !loading ? (
             <li className="shift-list-empty">No shifts scheduled</li>
           ) : (
             displayShifts.map((shift) => (
               <li key={shift.id} className="shift-item">
-                <div className="shift-date">{formatDate(shift.date)}</div>
+                <div className="shift-date">{formatMediumDate(shift.shift_date)}</div>
                 <div className="shift-time">
-                  {shift.start} – {shift.end}
+                  {shift.start_time} – {shift.end_time}
                 </div>
-                {shift.note && <div className="shift-note">{shift.note}</div>}
+                {shift.notes && <div className="shift-note">{shift.notes}</div>}
               </li>
             ))
           )}
@@ -117,8 +129,7 @@ const MiniCalendar = ({
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const todayStr = getTodayString();
 
   const prevMonth = () => {
     onMonthChange(new Date(year, month - 1, 1));

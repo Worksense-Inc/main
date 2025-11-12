@@ -18,6 +18,25 @@ export const loginValidator: ValidationChain[] = [
   body('password').notEmpty().withMessage('Password is required'),
 ];
 
+export const updateProfileValidator: ValidationChain[] = [
+  body('first_name')
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage('First name cannot be empty'),
+  body('last_name')
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage('Last name cannot be empty'),
+  body('email').optional().isEmail().withMessage('Valid email is required'),
+  body('current_password').optional().isString(),
+  body('new_password')
+    .optional()
+    .isLength({ min: 6 })
+    .withMessage('New password must be at least 6 characters'),
+];
+
 // Shift validators
 export const createShiftValidator: ValidationChain[] = [
   body('shift_date').isISO8601().withMessage('Valid date is required'),
@@ -54,7 +73,7 @@ export const createTimeOffValidator: ValidationChain[] = [
 ];
 
 export const updateTimeOffValidator: ValidationChain[] = [
-  param('id').isUUID().withMessage('Valid request ID required'),
+  param('id').notEmpty().withMessage('Request ID required'),
   body('status')
     .isIn(['approved', 'denied'])
     .withMessage('Status must be approved or denied'),

@@ -1,11 +1,35 @@
-import { FormEvent } from 'react';
+import { FormEvent, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../components/Toast';
 import logoUrl from '../assets/WorkSense_logo_compressed_under_1MB.jpg';
 import '../styles/login.css';
 
 export const LoginPage = () => {
-  const handleSubmit = (e: FormEvent) => {
+  const navigate = useNavigate();
+  const { login, loading } = useAuth();
+  const { showToast } = useToast();
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // Authentication will be implemented when backend is ready
+    if (submitting) return;
+    const form = e.target as HTMLFormElement;
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
+    const password = (form.elements.namedItem('password') as HTMLInputElement).value;
+    if (!email || !password) {
+      showToast('Email and password required');
+      return;
+    }
+    setSubmitting(true);
+    const ok = await login(email, password);
+    setSubmitting(false);
+    if (ok) {
+      showToast('Login successful');
+      navigate('/home');
+    } else {
+      showToast('Invalid credentials');
+    }
   };
 
   return (
@@ -36,7 +60,9 @@ export const LoginPage = () => {
               Forgot password?
             </button>
           </div>
-          <button type="submit">Log in</button>
+          <button type="submit" disabled={submitting || loading}>
+            {submitting ? 'Logging in...' : 'Log in'}
+          </button>
           <p className="signup-prompt">
             Don&apos;t have an account?{' '}
             <button type="button" className="signup-link">

@@ -1,5 +1,7 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../components/Toast';
+import { api } from '../services/api';
 import './AccountInfo.css';
 import '../styles/shared.css';
 
@@ -7,51 +9,90 @@ interface AccountFormData {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
-  location: string;
-  timezone: string;
   role: string;
 }
 
-interface NotificationSettings {
-  emailOnShiftChange: boolean;
-  dailyTextReminders: boolean;
-}
-
 export const AccountInfoPage = () => {
+  const { user, refreshUser } = useAuth();
   const { showToast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState<AccountFormData>({
-    firstName: 'Jorge',
-    lastName: 'Gonzales',
-    email: 'jorge@worksense.com',
-    phone: '(555) 123-4567',
-    location: 'Chicago, IL',
-    timezone: 'America/Chicago (CST)',
-    role: 'Manager',
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: '',
   });
 
-  const [notifications, setNotifications] = useState<NotificationSettings>({
-    emailOnShiftChange: true,
-    dailyTextReminders: false,
-  });
+  // Initialize form with user data
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.first_name,
+        lastName: user.last_name,
+        email: user.email,
+        role: user.role === 'manager' ? 'Manager' : 'Employee',
+      });
+    }
+  }, [user]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    showToast('Account details saved!');
+
+    if (!user) return;
+
+    setIsSubmitting(true);
+    try {
+      // Check if anything actually changed
+      const hasChanges =
+        formData.firstName !== user.first_name ||
+        formData.lastName !== user.last_name ||
+        formData.email !== user.email;
+
+      if (!hasChanges) {
+        showToast('No changes to save');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const updates: { first_name?: string; last_name?: string; email?: string } = {};
+
+      if (formData.firstName !== user.first_name) {
+        updates.first_name = formData.firstName;
+      }
+      if (formData.lastName !== user.last_name) {
+        updates.last_name = formData.lastName;
+      }
+      if (formData.email !== user.email) {
+        updates.email = formData.email;
+      }
+
+      const response = await api.updateProfile(updates);
+
+      if (response.success && response.data) {
+        // Refresh user context
+        await refreshUser();
+        showToast('Profile updated successfully');
+      } else {
+        showToast(response.message || 'Failed to update profile');
+      }
+    } catch {
+      showToast('Error updating profile');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
-    // Reset form to original values
-    setFormData({
-      firstName: 'Jorge',
-      lastName: 'Gonzales',
-      email: 'jorge@worksense.com',
-      phone: '(555) 123-4567',
-      location: 'Chicago, IL',
-      timezone: 'America/Chicago (CST)',
-      role: 'Manager',
-    });
+    // Reset form to original user values
+    if (user) {
+      setFormData({
+        firstName: user.first_name,
+        lastName: user.last_name,
+        email: user.email,
+        role: user.role === 'manager' ? 'Manager' : 'Employee',
+      });
+    }
     showToast('Changes discarded');
   };
 
@@ -76,11 +117,8 @@ export const AccountInfoPage = () => {
               <h2>
                 {formData.firstName} {formData.lastName}
               </h2>
-              <p className="role-info">{formData.role} • Central Team</p>
+              <p className="role-info">{formData.role}</p>
             </div>
-            <button className="btn-change-photo" type="button">
-              Change Photo
-            </button>
           </aside>
 
           <form className="card account-form" onSubmit={handleSubmit}>
@@ -118,93 +156,32 @@ export const AccountInfoPage = () => {
             </div>
 
             <div className="form-row">
-              <label htmlFor="phone">Phone</label>
-              <input
-                id="phone"
-                type="tel"
-                placeholder="(555) 123-4567"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              />
-            </div>
-
-            <div className="form-row">
-              <label htmlFor="location">Location / Timezone</label>
-              <div className="field-split">
-                <input
-                  id="location"
-                  type="text"
-                  placeholder="Chicago, IL"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                />
-                <select
-                  id="tz"
-                  aria-label="Timezone"
-                  value={formData.timezone}
-                  onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
-                >
-                  <option>America/Chicago (CST)</option>
-                  <option>America/New_York (EST)</option>
-                  <option>America/Los_Angeles (PST)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="form-row">
               <label htmlFor="role">Role</label>
               <input
                 id="role"
                 type="text"
-                placeholder="Manager"
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                disabled
+                className="input-disabled"
               />
+              <div className="helper-text">Role is managed by administrators</div>
             </div>
 
             <div className="form-actions">
-              <button className="btn btn-cancel" type="button" onClick={handleCancel}>
+              <button
+                className="btn btn-cancel"
+                type="button"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+              >
                 Cancel
               </button>
-              <button className="btn btn-primary" type="submit">
-                Save Changes
+              <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </form>
         </div>
-
-        <section className="card notifications-card">
-          <h3>Notification Preferences</h3>
-          <p className="small">Manage how you receive updates about shifts and schedules.</p>
-
-          <div className="switch-row">
-            <label className="switch">
-              <input
-                type="checkbox"
-                checked={notifications.emailOnShiftChange}
-                onChange={(e) =>
-                  setNotifications({ ...notifications, emailOnShiftChange: e.target.checked })
-                }
-              />
-              <span className="slider"></span>
-            </label>
-            <span>Email me when shifts change</span>
-          </div>
-
-          <div className="switch-row">
-            <label className="switch">
-              <input
-                type="checkbox"
-                checked={notifications.dailyTextReminders}
-                onChange={(e) =>
-                  setNotifications({ ...notifications, dailyTextReminders: e.target.checked })
-                }
-              />
-              <span className="slider"></span>
-            </label>
-            <span>Text me daily reminders</span>
-          </div>
-        </section>
       </div>
 
       <footer className="account-footer">

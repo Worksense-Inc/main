@@ -1,28 +1,77 @@
-import { useState } from 'react';
-import { demoSwapRequests, demoDayOffRequests } from '../data/mockData';
-import { ShiftSwapRequest, DayOffRequest } from '../types/data';
+import { useState, useEffect } from 'react';
+import { api, ShiftSwapDto, TimeOffDto, UserDto } from '../services/api';
 import { useToast } from '../components/Toast';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { getUserNameById } from '../utils/userHelpers';
+import { formatShortDate } from '../utils/dateHelpers';
 import './Manager.css';
 import '../styles/shared.css';
 
 export const ManagerBoardPage = () => {
   const { showToast } = useToast();
-  const [swapRequests, setSwapRequests] = useState<ShiftSwapRequest[]>(demoSwapRequests);
-  const [dayOffRequests, setDayOffRequests] = useState<DayOffRequest[]>(demoDayOffRequests);
+  const [swapRequests, setSwapRequests] = useState<ShiftSwapDto[]>([]);
+  const [timeOffRequests, setTimeOffRequests] = useState<TimeOffDto[]>([]);
+  const [users, setUsers] = useState<UserDto[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleSwapDecision = (id: string, approved: boolean) => {
-    setSwapRequests((prev) => prev.filter((r) => r.id !== id));
-    showToast(approved ? 'Shift swap approved' : 'Shift swap denied');
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      const [swapsRes, timeOffRes, usersRes] = await Promise.all([
+        api.getShiftSwaps({ status: 'pending' }),
+        api.getTimeOff({ status: 'pending' }),
+        api.getUsers(),
+      ]);
+      if (cancelled) return;
+
+      if (swapsRes.success && swapsRes.data) setSwapRequests(swapsRes.data);
+      else showToast(swapsRes.message || 'Failed to load shift swaps');
+
+      if (timeOffRes.success && timeOffRes.data) setTimeOffRequests(timeOffRes.data);
+      else showToast(timeOffRes.message || 'Failed to load time off requests');
+
+      if (usersRes.success && usersRes.data) setUsers(usersRes.data);
+
+      setLoading(false);
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [showToast]);
+
+  const handleSwapDecision = async (id: string, approved: boolean) => {
+    const status = approved ? 'approved' : 'denied';
+    const res = await api.approveShiftSwap(id, status);
+    if (res.success) {
+      setSwapRequests((prev) => prev.filter((r) => r.id !== id));
+      showToast(approved ? 'Shift swap approved' : 'Shift swap denied');
+    } else {
+      showToast(res.message || 'Failed to update shift swap');
+    }
   };
 
-  const handleDayOffDecision = (id: string, approved: boolean) => {
-    setDayOffRequests((prev) => prev.filter((r) => r.id !== id));
-    showToast(approved ? 'Time off approved' : 'Time off denied');
+  const handleDayOffDecision = async (id: string, approved: boolean) => {
+    const status = approved ? 'approved' : 'denied';
+    const res = await api.updateTimeOffStatus(id, status);
+    if (res.success) {
+      setTimeOffRequests((prev) => prev.filter((r) => r.id !== id));
+      showToast(approved ? 'Time off approved' : 'Time off denied');
+    } else {
+      showToast(res.message || 'Failed to update time off request');
+    }
   };
 
   return (
     <div className="manager-workspace">
       <h1 className="page-title">Manager Dashboard</h1>
+
+      {loading && (
+        <div className="card">
+          <LoadingSpinner text="Loading requests..." />
+        </div>
+      )}
 
       <div className="manager-grid">
         <div className="card manager-card">
@@ -37,9 +86,12 @@ export const ManagerBoardPage = () => {
               {swapRequests.map((request) => (
                 <div key={request.id} className="req-card">
                   <div className="req-title">
-                    {request.from} – {request.fromYear} with {request.with} – {request.withYear}
+                    {getUserNameById(request.requesting_employee_id, users)} requesting shift{' '}
+                    {request.shift_id.slice(0, 8)}
                   </div>
-                  <div className="req-meta">{request.note || ''}</div>
+                  <div className="req-meta">
+                    Created: {formatShortDate(request.created_at.split('T')[0])}
+                  </div>
                   <div className="req-actions">
                     <button
                       className="btn btn-approve"
@@ -65,17 +117,15 @@ export const ManagerBoardPage = () => {
             Day Off Requests <span className="subtitle">· pending approvals</span>
           </h2>
 
-          {dayOffRequests.length === 0 ? (
+          {timeOffRequests.length === 0 ? (
             <div className="empty-state">No pending time off requests</div>
           ) : (
             <div className="req-list">
-              {dayOffRequests.map((request) => (
+              {timeOffRequests.map((request) => (
                 <div key={request.id} className="req-card">
-                  <div className="req-title">
-                    {request.employee} – {request.year}
-                  </div>
+                  <div className="req-title">{getUserNameById(request.employee_id, users)}</div>
                   <div className="req-meta">
-                    {request.range}
+                    {formatShortDate(request.start_date)} – {formatShortDate(request.end_date)}
                     {request.reason && ` · ${request.reason}`}
                   </div>
                   <div className="req-actions">

@@ -33,14 +33,14 @@
   transform: translateY(1px);
 }
 
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btn-primary {
   background: #111827;
   color: #fff;
-}
-
-.btn-secondary {
-  background: #f3f4f6;
-  color: #111827;
 }
 
 .btn-approve {
@@ -70,15 +70,4 @@
 
 .link-btn:hover {
   color: #004869;
-}
-
-.muted {
-  color: #6b7280;
-  font-weight: 400;
-  font-size: 0.9rem;
-}
-
-.small-text {
-  font-size: 0.85rem;
-  color: #6b7280;
 }

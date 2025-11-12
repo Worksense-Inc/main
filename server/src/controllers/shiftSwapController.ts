@@ -1,43 +1,8 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../types';
 import { AppError } from '../middleware/errorHandler';
-
-// ========================================
-// PLACEHOLDER DATABASE FUNCTIONS
-// TODO: Replace with Jorge's model functions
-// ========================================
-const db = {
-  async getOpenShifts(): Promise<any[]> {
-    // TODO: Jorge will provide this query
-    // Should return shifts with status='open'
-    throw new Error('Database function not implemented');
-  },
-
-  async getShiftById(id: string): Promise<any | null> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  },
-
-  async createShiftSwapRequest(requestData: any): Promise<any> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  },
-
-  async getShiftSwapRequests(filters?: any): Promise<any[]> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  },
-
-  async updateShiftSwapStatus(id: string, status: string, approvedBy: string): Promise<any> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  },
-
-  async assignShiftToEmployee(shiftId: string, employeeId: string): Promise<any> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  }
-};
+import * as ShiftSwapModel from '../models/ShiftSwap';
+import * as ShiftModel from '../models/Shift';
 
 // ========================================
 // CONTROLLER FUNCTIONS
@@ -54,7 +19,7 @@ export const getAvailableShifts = async (
   next: NextFunction
 ) => {
   try {
-    const openShifts = await db.getOpenShifts();
+    const openShifts = await ShiftModel.findAll({ status: 'open' });
 
     res.status(200).json({
       success: true,
@@ -77,19 +42,19 @@ export const getShiftSwapRequests = async (
   next: NextFunction
 ) => {
   try {
-    const filters: any = {};
-    
+    const filters: Record<string, string> = {};
+
     // Employees only see their own requests
     if (req.user?.role === 'employee') {
       filters.requesting_employee_id = req.user.id;
     }
-    
+
     // Filter by status if specified
     if (req.query.status) {
-      filters.status = req.query.status;
+      filters.status = req.query.status as string;
     }
 
-    const requests = await db.getShiftSwapRequests(filters);
+    const requests = await ShiftSwapModel.findAll(filters);
 
     res.status(200).json({
       success: true,
@@ -119,7 +84,7 @@ export const requestShiftPickup = async (
     }
 
     // Verify shift exists and is open
-    const shift = await db.getShiftById(shift_id);
+    const shift = await ShiftModel.findById(shift_id);
     if (!shift) {
       throw new AppError('Shift not found', 404);
     }
@@ -128,7 +93,7 @@ export const requestShiftPickup = async (
       throw new AppError('This shift is not available for pickup', 400);
     }
 
-    const newRequest = await db.createShiftSwapRequest({
+    const newRequest = await ShiftSwapModel.create({
       shift_id,
       requesting_employee_id: req.user.id,
       status: 'pending',
@@ -166,14 +131,19 @@ export const approveShiftSwap = async (
       throw new AppError('Status must be approved or denied', 400);
     }
 
-    const updatedRequest = await db.updateShiftSwapStatus(id, status, req.user.id);
+    const updatedRequest = await ShiftSwapModel.update(id, {
+      status: status,
+      approved_by: req.user.id,
+      approved_at: new Date().toISOString(),
+    });
 
     // If approved, assign the shift to the requesting employee
     if (status === 'approved') {
-      await db.assignShiftToEmployee(
-        updatedRequest.shift_id, 
-        updatedRequest.requesting_employee_id
-      );
+      // Assign the shift to the requesting employee and mark as scheduled
+      await ShiftModel.update(updatedRequest.shift_id, {
+        assigned_to: updatedRequest.requesting_employee_id,
+        status: 'scheduled',
+      });
     }
 
     res.status(200).json({

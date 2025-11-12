@@ -1,40 +1,7 @@
 import { Response, NextFunction } from 'express';
-import { AuthRequest } from '../types';
+import { AuthRequest, User } from '../types';
 import { AppError } from '../middleware/errorHandler';
-
-// ========================================
-// PLACEHOLDER DATABASE FUNCTIONS
-// TODO: Replace with Jorge's User model functions
-// ========================================
-const db = {
-  async findAllUsers(): Promise<any[]> {
-    // TODO: Jorge will provide this query
-    // Should return array of user objects
-    throw new Error('Database function not implemented');
-  },
-
-  async findUserById(id: string): Promise<any | null> {
-    // TODO: Jorge will provide this query
-    // Should return user object or null
-    throw new Error('Database function not implemented');
-  },
-
-  async updateUser(id: string, userData: any): Promise<any> {
-    // TODO: Jorge will provide this query
-    // Should return updated user object
-    throw new Error('Database function not implemented');
-  },
-
-  async deleteUser(id: string): Promise<boolean> {
-    // TODO: Jorge will provide this query
-    // Should return success boolean
-    throw new Error('Database function not implemented');
-  }
-};
-
-// ========================================
-// CONTROLLER FUNCTIONS
-// ========================================
+import * as UserModel from '../models/User';
 
 /**
  * @route   GET /api/users
@@ -47,17 +14,16 @@ export const getAllUsers = async (
   next: NextFunction
 ) => {
   try {
-    const users = await db.findAllUsers();
+    const users = await UserModel.findAll();
 
     res.status(200).json({
       success: true,
-      data: users.map((user: any) => ({
+      data: users.map((user: User) => ({
         id: user.id,
         email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
         role: user.role,
-        created_at: user.created_at,
       })),
     });
   } catch (error) {
@@ -78,7 +44,7 @@ export const getUserById = async (
   try {
     const { id } = req.params;
 
-    const user = await db.findUserById(id);
+    const user = await UserModel.findById(id);
     if (!user) {
       throw new AppError('User not found', 404);
     }
@@ -114,13 +80,13 @@ export const updateUser = async (
     const updateData = req.body;
 
     // Validate user exists
-    const existingUser = await db.findUserById(id);
+    const existingUser = await UserModel.findById(id);
     if (!existingUser) {
       throw new AppError('User not found', 404);
     }
 
     // Update user
-    const updatedUser = await db.updateUser(id, updateData);
+    const updatedUser = await UserModel.update(id, updateData);
 
     res.status(200).json({
       success: true,
@@ -152,7 +118,7 @@ export const deleteUser = async (
     const { id } = req.params;
 
     // Validate user exists
-    const existingUser = await db.findUserById(id);
+    const existingUser = await UserModel.findById(id);
     if (!existingUser) {
       throw new AppError('User not found', 404);
     }
@@ -162,7 +128,7 @@ export const deleteUser = async (
       throw new AppError('Cannot delete your own account', 400);
     }
 
-    await db.deleteUser(id);
+    await UserModel.deleteUser(id);
 
     res.status(200).json({
       success: true,

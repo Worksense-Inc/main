@@ -1,50 +1,94 @@
-import { useState, useMemo } from 'react';
-import { demoShifts, demoUser } from '../data/mockData';
+import { useState, useMemo, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { api, ShiftDto, UserDto } from '../services/api';
+import { useToast } from '../components/Toast';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { getUserNameById } from '../utils/userHelpers';
 import './ManagerCalendar.css';
 import '../styles/shared.css';
 
 const ALL_EMPLOYEES = '__all__';
 
 export const ManagerCalendarPage = () => {
+  const { user } = useAuth();
+  const { showToast } = useToast();
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   });
   const [selectedEmployee, setSelectedEmployee] = useState<string>(ALL_EMPLOYEES);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [shifts, setShifts] = useState<ShiftDto[]>([]);
+  const [users, setUsers] = useState<UserDto[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Get unique employees
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      const [shiftsRes, usersRes] = await Promise.all([api.getShifts(), api.getUsers()]);
+      if (cancelled) return;
+
+      if (shiftsRes.success && shiftsRes.data) setShifts(shiftsRes.data);
+      else showToast(shiftsRes.message || 'Failed to load shifts');
+
+      if (usersRes.success && usersRes.data) setUsers(usersRes.data);
+
+      setLoading(false);
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [showToast]);
+
+  // Get unique employees from shifts
   const employees = useMemo(() => {
-    const uniqueEmployees = Array.from(new Set(demoShifts.map((s) => s.employee))).sort();
-    return uniqueEmployees;
-  }, []);
+    const assignedIds = new Set(
+      shifts.map((s) => s.assigned_to).filter((id): id is string => !!id),
+    );
+    return Array.from(assignedIds)
+      .map((id) => {
+        const foundUser = users.find((u) => u.id === id);
+        return {
+          id,
+          name: foundUser ? `${foundUser.first_name} ${foundUser.last_name}` : 'Unknown',
+        };
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [shifts, users]);
 
   // Get shifts for calendar highlighting (filtered by employee)
   const shiftDates = useMemo(() => {
     const filtered =
       selectedEmployee === ALL_EMPLOYEES
-        ? demoShifts
-        : demoShifts.filter((s) => s.employee.toLowerCase() === selectedEmployee.toLowerCase());
-    return new Set(filtered.map((shift) => shift.date));
-  }, [selectedEmployee]);
+        ? shifts
+        : shifts.filter((s) => s.assigned_to === selectedEmployee);
+    return new Set(filtered.map((shift) => shift.shift_date));
+  }, [shifts, selectedEmployee]);
 
   // Get shifts for display (filtered by date and employee)
   const displayShifts = useMemo(() => {
-    return demoShifts.filter((shift) => {
-      const matchesDate = shift.date === selectedDate;
+    return shifts.filter((shift) => {
+      const matchesDate = shift.shift_date === selectedDate;
       const matchesEmployee =
-        selectedEmployee === ALL_EMPLOYEES ||
-        shift.employee.toLowerCase() === selectedEmployee.toLowerCase();
+        selectedEmployee === ALL_EMPLOYEES || shift.assigned_to === selectedEmployee;
       return matchesDate && matchesEmployee;
     });
-  }, [selectedDate, selectedEmployee]);
+  }, [shifts, selectedDate, selectedEmployee]);
 
   return (
     <div className="manager-calendar-workspace">
       <header className="manager-calendar-header">
         <h1>Manager Calendar</h1>
-        <p className="welcome">Welcome, {demoUser.name}!</p>
+        <p className="welcome">Welcome, {user?.first_name || 'Manager'}!</p>
       </header>
+
+      {loading && (
+        <div className="card">
+          <LoadingSpinner text="Loading shifts..." />
+        </div>
+      )}
 
       <div className="manager-calendar-grid">
         <div className="card calendar-card">
@@ -81,8 +125,8 @@ export const ManagerCalendarPage = () => {
               >
                 <option value={ALL_EMPLOYEES}>All employees</option>
                 {employees.map((emp) => (
-                  <option key={emp} value={emp}>
-                    {emp}
+                  <option key={emp.id} value={emp.id}>
+                    {emp.name}
                   </option>
                 ))}
               </select>
@@ -97,12 +141,14 @@ export const ManagerCalendarPage = () => {
                 <li key={shift.id} className="manager-shift-item">
                   <div className="shift-info">
                     <div className="shift-time">
-                      {shift.start}–{shift.end}
+                      {shift.start_time}–{shift.end_time}
                     </div>
-                    <div className="shift-employee">· {shift.employee}</div>
-                    {shift.note && <div className="shift-note">— {shift.note}</div>}
+                    <div className="shift-employee">
+                      · {getUserNameById(shift.assigned_to, users)}
+                    </div>
+                    {shift.notes && <div className="shift-note">— {shift.notes}</div>}
                   </div>
-                  <div className="shift-date">{shift.date}</div>
+                  <div className="shift-date">{shift.shift_date}</div>
                 </li>
               ))}
             </ul>

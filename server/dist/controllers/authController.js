@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -7,36 +40,15 @@ exports.getCurrentUser = exports.logout = exports.login = exports.register = voi
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const errorHandler_1 = require("../middleware/errorHandler");
-// ========================================
-// PLACEHOLDER DATABASE FUNCTIONS
-// TODO: Replace with Jorge's User model functions
-// ========================================
-const db = {
-    async findUserByEmail(email) {
-        // TODO: Jorge will provide this query
-        // Should return user object or null
-        throw new Error('Database function not implemented');
-    },
-    async createUser(userData) {
-        // TODO: Jorge will provide this query
-        // Should return created user object
-        throw new Error('Database function not implemented');
-    },
-    async findUserById(id) {
-        // TODO: Jorge will provide this query
-        // Should return user object or null
-        throw new Error('Database function not implemented');
-    }
-};
-// ========================================
-// HELPER FUNCTIONS
-// ========================================
+const UserModel = __importStar(require("../models/User"));
 const generateToken = (userId, email, role) => {
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
         throw new Error('JWT_SECRET not configured');
     }
-    return jsonwebtoken_1.default.sign({ id: userId, email, role }, jwtSecret, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
+    return jsonwebtoken_1.default.sign({ id: userId, email, role }, jwtSecret, {
+        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+    });
 };
 // ========================================
 // CONTROLLER FUNCTIONS
@@ -50,7 +62,7 @@ const register = async (req, res, next) => {
     try {
         const { email, password, first_name, last_name, role } = req.body;
         // Check if user already exists
-        const existingUser = await db.findUserByEmail(email);
+        const existingUser = await UserModel.findByEmail(email);
         if (existingUser) {
             throw new errorHandler_1.AppError('User with this email already exists', 400);
         }
@@ -58,7 +70,7 @@ const register = async (req, res, next) => {
         const saltRounds = 10;
         const password_hash = await bcrypt_1.default.hash(password, saltRounds);
         // Create user
-        const newUser = await db.createUser({
+        const newUser = await UserModel.create({
             email,
             password_hash,
             first_name,
@@ -96,7 +108,7 @@ const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
         // Find user by email
-        const user = await db.findUserByEmail(email);
+        const user = await UserModel.findByEmail(email);
         if (!user) {
             throw new errorHandler_1.AppError('Invalid credentials', 401);
         }
@@ -157,7 +169,7 @@ const getCurrentUser = async (req, res, next) => {
             throw new errorHandler_1.AppError('User not authenticated', 401);
         }
         // Get full user details from database
-        const user = await db.findUserById(req.user.id);
+        const user = await UserModel.findById(req.user.id);
         if (!user) {
             throw new errorHandler_1.AppError('User not found', 404);
         }

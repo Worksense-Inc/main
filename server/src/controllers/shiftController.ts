@@ -1,58 +1,19 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../types';
 import { AppError } from '../middleware/errorHandler';
+import * as ShiftModel from '../models/Shift';
 
-// ========================================
-// PLACEHOLDER DATABASE FUNCTIONS
-// TODO: Replace with Jorge's Shift model functions
-// ========================================
-const db = {
-  async getAllShifts(filters?: any): Promise<any[]> {
-    // TODO: Jorge will provide this query
-    // Should support filters: date range, employee_id, status
-    throw new Error('Database function not implemented');
-  },
-
-  async getShiftById(id: string): Promise<any | null> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  },
-
-  async createShift(shiftData: any, createdBy: string): Promise<any> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  },
-
-  async updateShift(id: string, updates: any): Promise<any> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  },
-
-  async deleteShift(id: string): Promise<boolean> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  },
-
-  async getShiftsByDateRange(startDate: string, endDate: string, filters?: any): Promise<any[]> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  }
-};
-
-// ========================================
-// HELPER FUNCTIONS
-// ========================================
 const getWeekDates = (dateString: string) => {
   const date = new Date(dateString);
   const day = date.getDay();
   const diff = date.getDate() - day; // Get Monday
-  
+
   const monday = new Date(date.setDate(diff));
   const sunday = new Date(date.setDate(diff + 6));
-  
+
   return {
     start: monday.toISOString().split('T')[0],
-    end: sunday.toISOString().split('T')[0]
+    end: sunday.toISOString().split('T')[0],
   };
 };
 
@@ -73,18 +34,18 @@ export const getAllShifts = async (
 ) => {
   try {
     const { date, employee_id, status } = req.query;
-    
-    const filters: any = {};
-    if (date) filters.date = date;
-    if (employee_id) filters.employee_id = employee_id;
-    if (status) filters.status = status;
-    
+
+    const filters: Record<string, string> = {};
+    if (date) filters.date = date as string;
+    if (employee_id) filters.assigned_to = employee_id as string;
+    if (status) filters.status = status as string;
+
     // If employee, only show their own shifts
     if (req.user?.role === 'employee') {
-      filters.employee_id = req.user.id;
+      filters.assigned_to = req.user.id;
     }
 
-    const shifts = await db.getAllShifts(filters);
+    const shifts = await ShiftModel.findAll(filters);
 
     res.status(200).json({
       success: true,
@@ -108,18 +69,18 @@ export const getWeeklySchedule = async (
 ) => {
   try {
     const { date } = req.params;
-    
+
     // Get Monday to Sunday dates
     const { start, end } = getWeekDates(date);
-    
-    const filters: any = {};
-    
+
+    const filters: Record<string, string> = {};
+
     // If employee, only show their own shifts
     if (req.user?.role === 'employee') {
-      filters.employee_id = req.user.id;
+      filters.assigned_to = req.user.id;
     }
 
-    const shifts = await db.getShiftsByDateRange(start, end, filters);
+    const shifts = await ShiftModel.getByDateRange(start, end, filters);
 
     res.status(200).json({
       success: true,
@@ -147,7 +108,7 @@ export const getShiftById = async (
   try {
     const { id } = req.params;
 
-    const shift = await db.getShiftById(id);
+    const shift = await ShiftModel.findById(id);
     if (!shift) {
       throw new AppError('Shift not found', 404);
     }
@@ -177,13 +138,14 @@ export const createShift = async (
   next: NextFunction
 ) => {
   try {
-    const { assigned_to, shift_date, start_time, end_time, position, notes } = req.body;
+    const { assigned_to, shift_date, start_time, end_time, position, notes } =
+      req.body;
 
     if (!req.user) {
       throw new AppError('User not authenticated', 401);
     }
 
-    const newShift = await db.createShift({
+    const newShift = await ShiftModel.create({
       assigned_to: assigned_to || null,
       shift_date,
       start_time,
@@ -191,7 +153,8 @@ export const createShift = async (
       position,
       notes,
       status: assigned_to ? 'scheduled' : 'open',
-    }, req.user.id);
+      created_by: req.user.id,
+    });
 
     res.status(201).json({
       success: true,
@@ -217,12 +180,12 @@ export const updateShift = async (
     const { id } = req.params;
     const updates = req.body;
 
-    const existingShift = await db.getShiftById(id);
+    const existingShift = await ShiftModel.findById(id);
     if (!existingShift) {
       throw new AppError('Shift not found', 404);
     }
 
-    const updatedShift = await db.updateShift(id, updates);
+    const updatedShift = await ShiftModel.update(id, updates);
 
     res.status(200).json({
       success: true,
@@ -247,12 +210,12 @@ export const deleteShift = async (
   try {
     const { id } = req.params;
 
-    const shift = await db.getShiftById(id);
+    const shift = await ShiftModel.findById(id);
     if (!shift) {
       throw new AppError('Shift not found', 404);
     }
 
-    await db.deleteShift(id);
+    await ShiftModel.deleteShift(id);
 
     res.status(200).json({
       success: true,

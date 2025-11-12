@@ -37,7 +37,25 @@
     color 0.15s;
 }
 .ws-nav__links a:hover {
-  background: #edf2f7;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ws-nav__logout {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.375rem;
+  color: #0a2540;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.ws-nav__logout:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
 }
 .ws-nav__links a.active {
   background: #00334f;

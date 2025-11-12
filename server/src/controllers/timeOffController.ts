@@ -1,41 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../types';
 import { AppError } from '../middleware/errorHandler';
-
-// ========================================
-// PLACEHOLDER DATABASE FUNCTIONS
-// TODO: Replace with Jorge's TimeOff model functions
-// ========================================
-const db = {
-  async getAllTimeOffRequests(filters?: any): Promise<any[]> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  },
-
-  async getTimeOffById(id: string): Promise<any | null> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  },
-
-  async createTimeOffRequest(requestData: any): Promise<any> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  },
-
-  async updateTimeOffStatus(id: string, status: string, reviewedBy: string): Promise<any> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  },
-
-  async deleteTimeOffRequest(id: string): Promise<boolean> {
-    // TODO: Jorge will provide this query
-    throw new Error('Database function not implemented');
-  }
-};
-
-// ========================================
-// CONTROLLER FUNCTIONS
-// ========================================
+import * as TimeOffModel from '../models/TimeOff';
 
 /**
  * @route   GET /api/time-off
@@ -48,19 +14,19 @@ export const getAllTimeOffRequests = async (
   next: NextFunction
 ) => {
   try {
-    const filters: any = {};
-    
+    const filters: Record<string, string> = {};
+
     // Employees only see their own requests
     if (req.user?.role === 'employee') {
       filters.employee_id = req.user.id;
     }
-    
+
     // Managers can filter by status
     if (req.query.status) {
-      filters.status = req.query.status;
+      filters.status = req.query.status as string;
     }
 
-    const requests = await db.getAllTimeOffRequests(filters);
+    const requests = await TimeOffModel.findAll(filters);
 
     res.status(200).json({
       success: true,
@@ -85,7 +51,7 @@ export const getTimeOffById = async (
   try {
     const { id } = req.params;
 
-    const request = await db.getTimeOffById(id);
+    const request = await TimeOffModel.findById(id);
     if (!request) {
       throw new AppError('Time off request not found', 404);
     }
@@ -124,12 +90,12 @@ export const createTimeOffRequest = async (
     // Validate dates
     const startDate = new Date(start_date);
     const endDate = new Date(end_date);
-    
+
     if (endDate < startDate) {
       throw new AppError('End date must be after start date', 400);
     }
 
-    const newRequest = await db.createTimeOffRequest({
+    const newRequest = await TimeOffModel.create({
       employee_id: req.user.id,
       start_date,
       end_date,
@@ -165,7 +131,7 @@ export const updateTimeOffStatus = async (
       throw new AppError('User not authenticated', 401);
     }
 
-    const request = await db.getTimeOffById(id);
+    const request = await TimeOffModel.findById(id);
     if (!request) {
       throw new AppError('Time off request not found', 404);
     }
@@ -174,7 +140,11 @@ export const updateTimeOffStatus = async (
       throw new AppError('Only pending requests can be updated', 400);
     }
 
-    const updatedRequest = await db.updateTimeOffStatus(id, status, req.user.id);
+    const updatedRequest = await TimeOffModel.update(id, {
+      status: status,
+      reviewed_by: req.user.id,
+      reviewed_at: new Date().toISOString(),
+    });
 
     res.status(200).json({
       success: true,
@@ -203,7 +173,7 @@ export const deleteTimeOffRequest = async (
       throw new AppError('User not authenticated', 401);
     }
 
-    const request = await db.getTimeOffById(id);
+    const request = await TimeOffModel.findById(id);
     if (!request) {
       throw new AppError('Time off request not found', 404);
     }
@@ -217,7 +187,7 @@ export const deleteTimeOffRequest = async (
       throw new AppError('Only pending requests can be deleted', 400);
     }
 
-    await db.deleteTimeOffRequest(id);
+    await TimeOffModel.deleteTimeOffRequest(id);
 
     res.status(200).json({
       success: true,

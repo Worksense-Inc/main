@@ -1,38 +1,42 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.approveShiftSwap = exports.requestShiftPickup = exports.getShiftSwapRequests = exports.getAvailableShifts = void 0;
 const errorHandler_1 = require("../middleware/errorHandler");
-// ========================================
-// PLACEHOLDER DATABASE FUNCTIONS
-// TODO: Replace with Jorge's model functions
-// ========================================
-const db = {
-    async getOpenShifts() {
-        // TODO: Jorge will provide this query
-        // Should return shifts with status='open'
-        throw new Error('Database function not implemented');
-    },
-    async getShiftById(id) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    },
-    async createShiftSwapRequest(requestData) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    },
-    async getShiftSwapRequests(filters) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    },
-    async updateShiftSwapStatus(id, status, approvedBy) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    },
-    async assignShiftToEmployee(shiftId, employeeId) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    }
-};
+const ShiftSwapModel = __importStar(require("../models/ShiftSwap"));
+const ShiftModel = __importStar(require("../models/Shift"));
 // ========================================
 // CONTROLLER FUNCTIONS
 // ========================================
@@ -43,7 +47,7 @@ const db = {
  */
 const getAvailableShifts = async (req, res, next) => {
     try {
-        const openShifts = await db.getOpenShifts();
+        const openShifts = await ShiftModel.findAll({ status: 'open' });
         res.status(200).json({
             success: true,
             data: openShifts,
@@ -71,7 +75,7 @@ const getShiftSwapRequests = async (req, res, next) => {
         if (req.query.status) {
             filters.status = req.query.status;
         }
-        const requests = await db.getShiftSwapRequests(filters);
+        const requests = await ShiftSwapModel.findAll(filters);
         res.status(200).json({
             success: true,
             data: requests,
@@ -95,14 +99,14 @@ const requestShiftPickup = async (req, res, next) => {
             throw new errorHandler_1.AppError('User not authenticated', 401);
         }
         // Verify shift exists and is open
-        const shift = await db.getShiftById(shift_id);
+        const shift = await ShiftModel.findById(shift_id);
         if (!shift) {
             throw new errorHandler_1.AppError('Shift not found', 404);
         }
         if (shift.status !== 'open') {
             throw new errorHandler_1.AppError('This shift is not available for pickup', 400);
         }
-        const newRequest = await db.createShiftSwapRequest({
+        const newRequest = await ShiftSwapModel.create({
             shift_id,
             requesting_employee_id: req.user.id,
             status: 'pending',
@@ -133,10 +137,18 @@ const approveShiftSwap = async (req, res, next) => {
         if (!['approved', 'denied'].includes(status)) {
             throw new errorHandler_1.AppError('Status must be approved or denied', 400);
         }
-        const updatedRequest = await db.updateShiftSwapStatus(id, status, req.user.id);
+        const updatedRequest = await ShiftSwapModel.update(id, {
+            status: status,
+            approved_by: req.user.id,
+            approved_at: new Date().toISOString(),
+        });
         // If approved, assign the shift to the requesting employee
         if (status === 'approved') {
-            await db.assignShiftToEmployee(updatedRequest.shift_id, updatedRequest.requesting_employee_id);
+            // Assign the shift to the requesting employee and mark as scheduled
+            await ShiftModel.update(updatedRequest.shift_id, {
+                assigned_to: updatedRequest.requesting_employee_id,
+                status: 'scheduled',
+            });
         }
         res.status(200).json({
             success: true,

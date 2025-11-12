@@ -1,41 +1,41 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteShift = exports.updateShift = exports.createShift = exports.getShiftById = exports.getWeeklySchedule = exports.getAllShifts = void 0;
 const errorHandler_1 = require("../middleware/errorHandler");
-// ========================================
-// PLACEHOLDER DATABASE FUNCTIONS
-// TODO: Replace with Jorge's Shift model functions
-// ========================================
-const db = {
-    async getAllShifts(filters) {
-        // TODO: Jorge will provide this query
-        // Should support filters: date range, employee_id, status
-        throw new Error('Database function not implemented');
-    },
-    async getShiftById(id) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    },
-    async createShift(shiftData, createdBy) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    },
-    async updateShift(id, updates) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    },
-    async deleteShift(id) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    },
-    async getShiftsByDateRange(startDate, endDate, filters) {
-        // TODO: Jorge will provide this query
-        throw new Error('Database function not implemented');
-    }
-};
-// ========================================
-// HELPER FUNCTIONS
-// ========================================
+const ShiftModel = __importStar(require("../models/Shift"));
 const getWeekDates = (dateString) => {
     const date = new Date(dateString);
     const day = date.getDay();
@@ -44,7 +44,7 @@ const getWeekDates = (dateString) => {
     const sunday = new Date(date.setDate(diff + 6));
     return {
         start: monday.toISOString().split('T')[0],
-        end: sunday.toISOString().split('T')[0]
+        end: sunday.toISOString().split('T')[0],
     };
 };
 // ========================================
@@ -70,7 +70,7 @@ const getAllShifts = async (req, res, next) => {
         if (req.user?.role === 'employee') {
             filters.employee_id = req.user.id;
         }
-        const shifts = await db.getAllShifts(filters);
+        const shifts = await ShiftModel.findAll(filters);
         res.status(200).json({
             success: true,
             data: shifts,
@@ -97,7 +97,7 @@ const getWeeklySchedule = async (req, res, next) => {
         if (req.user?.role === 'employee') {
             filters.employee_id = req.user.id;
         }
-        const shifts = await db.getShiftsByDateRange(start, end, filters);
+        const shifts = await ShiftModel.getByDateRange(start, end, filters);
         res.status(200).json({
             success: true,
             data: {
@@ -120,7 +120,7 @@ exports.getWeeklySchedule = getWeeklySchedule;
 const getShiftById = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const shift = await db.getShiftById(id);
+        const shift = await ShiftModel.findById(id);
         if (!shift) {
             throw new errorHandler_1.AppError('Shift not found', 404);
         }
@@ -149,7 +149,7 @@ const createShift = async (req, res, next) => {
         if (!req.user) {
             throw new errorHandler_1.AppError('User not authenticated', 401);
         }
-        const newShift = await db.createShift({
+        const newShift = await ShiftModel.create({
             assigned_to: assigned_to || null,
             shift_date,
             start_time,
@@ -157,7 +157,8 @@ const createShift = async (req, res, next) => {
             position,
             notes,
             status: assigned_to ? 'scheduled' : 'open',
-        }, req.user.id);
+            created_by: req.user.id,
+        });
         res.status(201).json({
             success: true,
             message: 'Shift created successfully',
@@ -178,11 +179,11 @@ const updateShift = async (req, res, next) => {
     try {
         const { id } = req.params;
         const updates = req.body;
-        const existingShift = await db.getShiftById(id);
+        const existingShift = await ShiftModel.findById(id);
         if (!existingShift) {
             throw new errorHandler_1.AppError('Shift not found', 404);
         }
-        const updatedShift = await db.updateShift(id, updates);
+        const updatedShift = await ShiftModel.update(id, updates);
         res.status(200).json({
             success: true,
             message: 'Shift updated successfully',
@@ -202,11 +203,11 @@ exports.updateShift = updateShift;
 const deleteShift = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const shift = await db.getShiftById(id);
+        const shift = await ShiftModel.findById(id);
         if (!shift) {
             throw new errorHandler_1.AppError('Shift not found', 404);
         }
-        await db.deleteShift(id);
+        await ShiftModel.deleteShift(id);
         res.status(200).json({
             success: true,
             message: 'Shift deleted successfully',
