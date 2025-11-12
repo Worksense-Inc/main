@@ -6,7 +6,7 @@ Worksense is a small workplace scheduling application providing shift management
 
 This repository contains:
 
-1. `Frontend/` – React + TypeScript front-end client (Vite)
+1. `frontend/` – React + TypeScript front-end client (Vite)
 2. `server/` – Express + TypeScript API server
 
 ## Database Setup (Minimal)
