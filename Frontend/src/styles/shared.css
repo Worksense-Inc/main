@@ -1,0 +1,84 @@
+/* Shared component styles */
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.06);
+  padding: 1rem;
+}
+
+.card h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+  color: #111827;
+}
+
+.btn {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: #111827;
+  color: #fff;
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.btn-approve {
+  background: #10b981;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.9rem;
+}
+
+.btn-deny {
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.9rem;
+}
+
+.link-btn {
+  appearance: none;
+  background: none;
+  border: none;
+  color: #0a2540;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+
+.link-btn:hover {
+  color: #004869;
+}
+
+.muted {
+  color: #6b7280;
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+
+.small-text {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
