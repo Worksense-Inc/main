@@ -6,7 +6,7 @@ Worksense is a small workplace scheduling application providing shift management
 
 This repository contains:
 
-1. `Frontend/` – Front-end client (setup TBD)
+1. `Frontend/` – React + TypeScript front-end client (Vite)
 2. `server/` – Express + TypeScript API server
 
 ## Database Setup (Minimal)
@@ -44,10 +44,33 @@ Important constraints:
    cd server
    npm install
    ```
-2. Configure environment variables in `server/.env` as needed for your API server
+2. Configure environment variables by copying `.env.example` to `.env` and updating values:
+   ```bash
+   cp .env.example .env
+   ```
 3. Start development server:
    ```bash
    npm run dev
+   ```
+
+## Frontend Setup
+
+1. Install dependencies (inside `Frontend/`):
+   ```bash
+   cd Frontend
+   npm install
+   ```
+2. Configure environment variables by copying `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+3. Start development server:
+   ```bash
+   npm run dev
+   ```
+4. Build for production:
+   ```bash
+   npm run build
    ```
 
 ## Contributing
